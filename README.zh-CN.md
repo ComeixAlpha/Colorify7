@@ -76,6 +76,39 @@ pnpm tauri build  # 生成平台安装包
 - 在 Windows 上，需先启用 UWP 回环豁免，游戏才能访问本地服务器。
 - 使用 `/connect 127.0.0.1:<port>` 连接。
 
+## 画廊
+
+<table>
+    <tr>
+        <td colspan=2><a href="https://skfb.ly/pK9UV">"Hornet - Hollow Knight - Handpainted" by TonXx</a></td>
+    </tr>
+    <tr>
+        <td><img src="./gallery/hornet.png" alt="示例图片" style="height:400px; width:auto;"></td>
+        <td><img src="./gallery/hornet_voxel.png" alt="示例图片" style="height:400px; width:auto;"></td>
+    </tr>
+    <tr>
+        <td colspan=2><a href="https://skfb.ly/pK9UV">"Broken Steampunk Clock" by VassKacsoHunor</a></td>
+    </tr>
+    <tr>
+        <td><img src="./gallery/clock.png" alt="示例图片" style="height:400px; width:auto;"></td>
+        <td><img src="./gallery/clock_voxel.png" alt="示例图片" style="height:400px; width:auto;"></td>
+    </tr>
+    <tr>
+        <td colspan=2><a href="https://skfb.ly/pK9UV">"Fast-food" by Korneev Nikita Kirillovich</a></td>
+    </tr>
+    <tr>
+        <td><img src="./gallery/fast_food.png" alt="示例图片" style="height:400px; width:auto;"></td>
+        <td><img src="./gallery/fast_food_voxel.png" alt="示例图片" style="height:400px; width:auto;"></td>
+    </tr>
+    <tr>
+        <td colspan=2><a href="https://skfb.ly/pK9UV">"Frank" by misterdevious</a></td>
+    </tr>
+    <tr>
+        <td><img src="./gallery/frank.png" alt="示例图片" style="height:400px; width:auto;"></td>
+        <td><img src="./gallery/frank_voxel.png" alt="示例图片" style="height:400px; width:auto;"></td>
+    </tr>
+</table>
+
 ## 致谢
 
 - [SlopeCraft](https://github.com/SlopeCraft/SlopeCraft) —— Minecraft 地图像素画生成器，像素艺术管线的灵感来源。

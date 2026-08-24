@@ -21,6 +21,7 @@ The application is built with [Tauri 2](https://tauri.app/) and [React](https://
     - [Run from Source](#run-from-source)
     - [Build a Release](#build-a-release)
   - [Usage](#usage)
+  - [Gallery](#gallery)
   - [Acknowledgements](#acknowledgements)
   - [License](#license)
 
@@ -84,6 +85,39 @@ To stream into the game:
 - Enable "Enable WebSocket" and disable "WebSocket Requires Encryption" in the Minecraft settings.
 - On Windows, enable the UWP loopback exemption first so that the game can reach a local server.
 - Connect with `/connect 127.0.0.1:<port>`.
+
+## Gallery
+
+<table>
+    <tr>
+        <td colspan=2><a href="https://skfb.ly/pK9UV">"Hornet - Hollow Knight - Handpainted" by TonXx</a></td>
+    </tr>
+    <tr>
+        <td><img src="./gallery/hornet.png" alt="示例图片" style="height:400px; width:auto;"></td>
+        <td><img src="./gallery/hornet_voxel.png" alt="示例图片" style="height:400px; width:auto;"></td>
+    </tr>
+    <tr>
+        <td colspan=2><a href="https://skfb.ly/pK9UV">"Broken Steampunk Clock" by VassKacsoHunor</a></td>
+    </tr>
+    <tr>
+        <td><img src="./gallery/clock.png" alt="示例图片" style="height:400px; width:auto;"></td>
+        <td><img src="./gallery/clock_voxel.png" alt="示例图片" style="height:400px; width:auto;"></td>
+    </tr>
+    <tr>
+        <td colspan=2><a href="https://skfb.ly/pK9UV">"Fast-food" by Korneev Nikita Kirillovich</a></td>
+    </tr>
+    <tr>
+        <td><img src="./gallery/fast_food.png" alt="示例图片" style="height:400px; width:auto;"></td>
+        <td><img src="./gallery/fast_food_voxel.png" alt="示例图片" style="height:400px; width:auto;"></td>
+    </tr>
+    <tr>
+        <td colspan=2><a href="https://skfb.ly/pK9UV">"Frank" by misterdevious</a></td>
+    </tr>
+    <tr>
+        <td><img src="./gallery/frank.png" alt="示例图片" style="height:400px; width:auto;"></td>
+        <td><img src="./gallery/frank_voxel.png" alt="示例图片" style="height:400px; width:auto;"></td>
+    </tr>
+</table>
 
 ## Acknowledgements
 
