@@ -1,0 +1,140 @@
+@import "tailwindcss";
+
+html,
+body {
+  background-color: #111318;
+}
+
+@theme inline {
+  --font-sans: "Google Sans Flex Variable", sans-serif;
+
+  /* 主色 */
+  --color-md-primary: var(--md-sys-color-primary);
+  --color-md-on-primary: var(--md-sys-color-on-primary);
+  --color-md-primary-container: var(--md-sys-color-primary-container);
+  --color-md-on-primary-container: var(--md-sys-color-on-primary-container);
+  --color-md-primary-fixed: var(--md-sys-color-primary-fixed);
+  --color-md-on-primary-fixed: var(--md-sys-color-on-primary-fixed);
+  --color-md-inverse-primary: var(--md-sys-color-inverse-primary);
+
+  /* 次要色 */
+  --color-md-secondary: var(--md-sys-color-secondary);
+  --color-md-on-secondary: var(--md-sys-color-on-secondary);
+  --color-md-secondary-container: var(--md-sys-color-secondary-container);
+  --color-md-on-secondary-container: var(--md-sys-color-on-secondary-container);
+
+  /* 第三色 */
+  --color-md-tertiary: var(--md-sys-color-tertiary);
+  --color-md-on-tertiary: var(--md-sys-color-on-tertiary);
+  --color-md-tertiary-container: var(--md-sys-color-tertiary-container);
+  --color-md-on-tertiary-container: var(--md-sys-color-on-tertiary-container);
+
+  /* 错误色 */
+  --color-md-error: var(--md-sys-color-error);
+  --color-md-on-error: var(--md-sys-color-on-error);
+  --color-md-error-container: var(--md-sys-color-error-container);
+  --color-md-on-error-container: var(--md-sys-color-on-error-container);
+
+  /* 背景与 Surface 层级 */
+  --color-md-background: var(--md-sys-color-background);
+  --color-md-on-background: var(--md-sys-color-on-background);
+  --color-md-surface: var(--md-sys-color-surface);
+  --color-md-surface-dim: var(--md-sys-color-surface-dim);
+  --color-md-surface-bright: var(--md-sys-color-surface-bright);
+  --color-md-surface-container-lowest: var(
+    --md-sys-color-surface-container-lowest
+  );
+  --color-md-surface-container-low: var(--md-sys-color-surface-container-low);
+  --color-md-surface-container: var(--md-sys-color-surface-container);
+  --color-md-surface-container-high: var(--md-sys-color-surface-container-high);
+  --color-md-surface-container-highest: var(
+    --md-sys-color-surface-container-highest
+  );
+  --color-md-surface-variant: var(--md-sys-color-surface-variant);
+  --color-md-on-surface: var(--md-sys-color-on-surface);
+  --color-md-on-surface-variant: var(--md-sys-color-on-surface-variant);
+  --color-md-inverse-surface: var(--md-sys-color-inverse-surface);
+  --color-md-inverse-on-surface: var(--md-sys-color-inverse-on-surface);
+
+  /* 轮廓与辅助 */
+  --color-md-outline: var(--md-sys-color-outline);
+  --color-md-outline-variant: var(--md-sys-color-outline-variant);
+  --color-md-shadow: var(--md-sys-color-shadow);
+  --color-md-scrim: var(--md-sys-color-scrim);
+  --color-md-surface-tint: var(--md-sys-color-surface-tint);
+
+  /* M3 Expressive 圆角 */
+  --radius-md-xs: 4px;
+  --radius-md-sm: 8px;
+  --radius-md-md: 12px;
+  --radius-md-lg: 16px;
+  --radius-md-xl: 28px;
+  --radius-md-full: 9999px;
+}
+
+/* 细滚动条：轨道透明 */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--m3e-scrollbar-thumb-color, #8e9099) transparent;
+}
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: var(--m3e-scrollbar-thumb-color, #8e9099);
+  border-radius: 9999px;
+}
+
+/* —— 窄屏布局 —— */
+
+/* 窄屏下隐藏滚动条 */
+@media (max-width: 959.98px) {
+  .scrollbar-thin,
+  *::-webkit-scrollbar,
+  * {
+    scrollbar-width: none;
+  }
+  .scrollbar-thin::-webkit-scrollbar,
+  *::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+
+  /* Dialog */
+  m3e-dialog {
+    --m3e-dialog-max-width: calc(100vw - 32px);
+  }
+}
+
+/* Tab */
+m3e-tabs.m3e-tabs-compact m3e-tab {
+  height: 44px;
+}
+
+/* 预览区工具栏 */
+.toolbar-stretch m3e-button {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+}
+
+/* FAQ */
+m3e-list-item.faq-item {
+  --m3e-list-item-container-shape: 14px;
+  --m3e-list-item-container-color: transparent;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+m3e-list-item.faq-item:hover {
+  --m3e-list-item-container-color: var(--md-sys-color-surface-container-high);
+}
+m3e-list-item.faq-item:active {
+  --m3e-list-item-container-color: var(
+    --md-sys-color-surface-container-highest
+  );
+}

@@ -1,0 +1,1244 @@
+{
+  "palette": [
+    {
+      "id": "amethyst_block",
+      "cn": "紫水晶块",
+      "average": [133, 97, 191]
+    },
+    {
+      "id": "ancient_debris",
+      "cn": "远古残骸",
+      "average": [95, 63, 55]
+    },
+    {
+      "id": "bamboo_block",
+      "cn": "竹块",
+      "average": [127, 144, 57]
+    },
+    {
+      "id": "bamboo_mosaic",
+      "cn": "竹马赛克",
+      "average": [190, 170, 78]
+    },
+    {
+      "id": "bamboo",
+      "cn": "竹子",
+      "average": [93, 144, 19]
+    },
+    {
+      "id": "basalt",
+      "cn": "玄武岩",
+      "average": [73, 72, 77]
+    },
+    {
+      "id": "beacon",
+      "cn": "信标",
+      "average": [117, 220, 215]
+    },
+    {
+      "id": "bedrock",
+      "cn": "基岩",
+      "average": [85, 85, 85]
+    },
+    {
+      "id": "blackstone",
+      "cn": "黑石",
+      "average": [42, 35, 40]
+    },
+    {
+      "id": "blast_furnace",
+      "cn": "高炉",
+      "average": [107, 107, 107]
+    },
+    {
+      "id": "lit_blast_furnace",
+      "cn": "燃烧中的高炉",
+      "average": [115, 110, 105]
+    },
+    {
+      "id": "blue_ice",
+      "cn": "蓝冰",
+      "average": [116, 167, 253]
+    },
+    {
+      "id": "bone_block",
+      "cn": "骨块",
+      "average": [229, 225, 207]
+    },
+    {
+      "id": "bookshelf",
+      "cn": "书架",
+      "average": [117, 94, 59]
+    },
+    {
+      "id": "brick_block",
+      "cn": "红砖块",
+      "average": [150, 97, 83]
+    },
+    {
+      "id": "budding_amethyst",
+      "cn": "紫水晶母岩",
+      "average": [132, 96, 186]
+    },
+    {
+      "id": "allow",
+      "cn": "允许方块",
+      "average": [136, 115, 83]
+    },
+    {
+      "id": "deny",
+      "cn": "拒绝方块",
+      "average": [111, 111, 111]
+    },
+    {
+      "id": "calcite",
+      "cn": "方解石",
+      "average": [223, 224, 220]
+    },
+    {
+      "id": "cartography_table",
+      "cn": "制图台",
+      "average": [70, 50, 34]
+    },
+    {
+      "id": "cauldron",
+      "cn": "炼药锅",
+      "average": [49, 49, 53]
+    },
+    {
+      "id": "chain_command_block",
+      "cn": "连锁型命令方块",
+      "average": [126, 150, 140]
+    },
+    {
+      "id": "cherry_log",
+      "cn": "樱花原木",
+      "average": [54, 33, 44]
+    },
+    {
+      "id": "chiseled_bookshelf",
+      "cn": "雕纹书架",
+      "average": [175, 141, 86]
+    },
+    {
+      "id": "chiseled_nether_bricks",
+      "cn": "雕纹下界砖块",
+      "average": [47, 23, 28]
+    },
+    {
+      "id": "chiseled_polished_blackstone",
+      "cn": "雕纹磨制黑石",
+      "average": [53, 48, 56]
+    },
+    {
+      "id": "clay",
+      "cn": "黏土",
+      "average": [160, 166, 179]
+    },
+    {
+      "id": "coal_block",
+      "cn": "煤炭块",
+      "average": [16, 15, 15]
+    },
+    {
+      "id": "coal_ore",
+      "cn": "煤矿石",
+      "average": [105, 105, 105]
+    },
+    {
+      "id": "mossy_cobblestone",
+      "cn": "苔石",
+      "average": [110, 118, 94]
+    },
+    {
+      "id": "command_block",
+      "cn": "命令方块",
+      "average": [163, 127, 107]
+    },
+    {
+      "id": "black_concrete",
+      "cn": "黑色混凝土",
+      "average": [8, 10, 15]
+    },
+    {
+      "id": "blue_concrete",
+      "cn": "蓝色混凝土",
+      "average": [44, 46, 143]
+    },
+    {
+      "id": "brown_concrete",
+      "cn": "棕色混凝土",
+      "average": [96, 59, 31]
+    },
+    {
+      "id": "cyan_concrete",
+      "cn": "青色混凝土",
+      "average": [21, 119, 136]
+    },
+    {
+      "id": "gray_concrete",
+      "cn": "灰色混凝土",
+      "average": [54, 57, 61]
+    },
+    {
+      "id": "green_concrete",
+      "cn": "绿色混凝土",
+      "average": [73, 91, 36]
+    },
+    {
+      "id": "light_blue_concrete",
+      "cn": "淡蓝色混凝土",
+      "average": [35, 137, 198]
+    },
+    {
+      "id": "lime_concrete",
+      "cn": "黄绿色混凝土",
+      "average": [94, 168, 24]
+    },
+    {
+      "id": "magenta_concrete",
+      "cn": "品红色混凝土",
+      "average": [169, 48, 159]
+    },
+    {
+      "id": "orange_concrete",
+      "cn": "橙色混凝土",
+      "average": [224, 97, 0]
+    },
+    {
+      "id": "pink_concrete",
+      "cn": "粉红色混凝土",
+      "average": [213, 101, 142]
+    },
+    {
+      "id": "black_concrete_powder",
+      "cn": "黑色混凝土粉末",
+      "average": [25, 26, 31]
+    },
+    {
+      "id": "blue_concrete_powder",
+      "cn": "蓝色混凝土粉末",
+      "average": [70, 73, 166]
+    },
+    {
+      "id": "brown_concrete_powder",
+      "cn": "棕色混凝土粉末",
+      "average": [125, 84, 53]
+    },
+    {
+      "id": "cyan_concrete_powder",
+      "cn": "青色混凝土粉末",
+      "average": [36, 147, 157]
+    },
+    {
+      "id": "gray_concrete_powder",
+      "cn": "灰色混凝土粉末",
+      "average": [76, 81, 84]
+    },
+    {
+      "id": "green_concrete_powder",
+      "cn": "绿色混凝土粉末",
+      "average": [97, 119, 44]
+    },
+    {
+      "id": "light_blue_concrete_powder",
+      "cn": "淡蓝色混凝土粉末",
+      "average": [74, 180, 213]
+    },
+    {
+      "id": "lime_concrete_powder",
+      "cn": "黄绿色混凝土粉末",
+      "average": [125, 189, 41]
+    },
+    {
+      "id": "magenta_concrete_powder",
+      "cn": "品红色混凝土粉末",
+      "average": [192, 83, 184]
+    },
+    {
+      "id": "orange_concrete_powder",
+      "cn": "橙色混凝土粉末",
+      "average": [227, 131, 31]
+    },
+    {
+      "id": "pink_concrete_powder",
+      "cn": "粉红色混凝土粉末",
+      "average": [228, 153, 181]
+    },
+    {
+      "id": "purple_concrete_powder",
+      "cn": "紫色混凝土粉末",
+      "average": [131, 55, 177]
+    },
+    {
+      "id": "red_concrete_powder",
+      "cn": "红色混凝土粉末",
+      "average": [168, 54, 50]
+    },
+    {
+      "id": "light_gray_concrete_powder",
+      "cn": "淡灰色混凝土粉末",
+      "average": [154, 154, 148]
+    },
+    {
+      "id": "white_concrete_powder",
+      "cn": "白色混凝土粉末",
+      "average": [225, 227, 227]
+    },
+    {
+      "id": "yellow_concrete_powder",
+      "cn": "黄色混凝土粉末",
+      "average": [232, 199, 54]
+    },
+    {
+      "id": "purple_concrete",
+      "cn": "紫色混凝土",
+      "average": [100, 31, 156]
+    },
+    {
+      "id": "red_concrete",
+      "cn": "红色混凝土",
+      "average": [142, 32, 32]
+    },
+    {
+      "id": "light_gray_concrete",
+      "cn": "淡灰色混凝土",
+      "average": [125, 125, 115]
+    },
+    {
+      "id": "white_concrete",
+      "cn": "白色混凝土",
+      "average": [207, 213, 214]
+    },
+    {
+      "id": "yellow_concrete",
+      "cn": "黄色混凝土",
+      "average": [240, 175, 21]
+    },
+    {
+      "id": "copper_block",
+      "cn": "铜块",
+      "average": [192, 107, 79]
+    },
+    {
+      "id": "copper_ore",
+      "cn": "铜矿石",
+      "average": [124, 125, 120]
+    },
+    {
+      "id": "cracked_nether_bricks",
+      "cn": "裂纹下界砖块",
+      "average": [40, 20, 23]
+    },
+    {
+      "id": "cracked_polished_blackstone_bricks",
+      "cn": "裂纹磨制黑石砖",
+      "average": [44, 37, 43]
+    },
+    {
+      "id": "crafting_table",
+      "cn": "工作台",
+      "average": [129, 105, 70]
+    },
+    {
+      "id": "crimson_nylium",
+      "cn": "绯红菌岩",
+      "average": [107, 26, 26]
+    },
+    {
+      "id": "crying_obsidian",
+      "cn": "哭泣的黑曜石",
+      "average": [32, 10, 60]
+    },
+    {
+      "id": "cut_copper",
+      "cn": "切制铜块",
+      "average": [191, 106, 80]
+    },
+    {
+      "id": "chiseled_deepslate",
+      "cn": "雕纹深板岩",
+      "average": [54, 54, 54]
+    },
+    {
+      "id": "cobbled_deepslate",
+      "cn": "深板岩圆石",
+      "average": [77, 77, 80]
+    },
+    {
+      "id": "cracked_deepslate_bricks",
+      "cn": "裂纹深板岩砖",
+      "average": [64, 64, 65]
+    },
+    {
+      "id": "cracked_deepslate_tiles",
+      "cn": "裂纹深板岩瓦",
+      "average": [52, 52, 52]
+    },
+    {
+      "id": "deepslate",
+      "cn": "深板岩",
+      "average": [80, 80, 82]
+    },
+    {
+      "id": "deepslate_brick_double_slab",
+      "cn": "深板岩砖双层台阶",
+      "average": [70, 70, 71]
+    },
+    {
+      "id": "deepslate_coal_ore",
+      "cn": "深层煤矿石",
+      "average": [74, 74, 76]
+    },
+    {
+      "id": "deepslate_copper_ore",
+      "cn": "深层铜矿石",
+      "average": [92, 93, 89]
+    },
+    {
+      "id": "deepslate_diamond_ore",
+      "cn": "深层钻石矿石",
+      "average": [83, 106, 106]
+    },
+    {
+      "id": "deepslate_emerald_ore",
+      "cn": "深层绿宝石矿石",
+      "average": [78, 104, 87]
+    },
+    {
+      "id": "deepslate_gold_ore",
+      "cn": "深层金矿石",
+      "average": [115, 102, 78]
+    },
+    {
+      "id": "deepslate_iron_ore",
+      "cn": "深层铁矿石",
+      "average": [106, 99, 94]
+    },
+    {
+      "id": "deepslate_lapis_ore",
+      "cn": "深层青金石矿石",
+      "average": [79, 90, 115]
+    },
+    {
+      "id": "deepslate_redstone_ore",
+      "cn": "深层红石矿石",
+      "average": [104, 73, 74]
+    },
+    {
+      "id": "deepslate_tile_double_slab",
+      "cn": "深板岩瓦双层台阶",
+      "average": [54, 54, 55]
+    },
+    {
+      "id": "polished_deepslate",
+      "cn": "磨制深板岩",
+      "average": [72, 72, 73]
+    },
+    {
+      "id": "diamond_block",
+      "cn": "钻石块",
+      "average": [98, 237, 228]
+    },
+    {
+      "id": "diamond_ore",
+      "cn": "钻石矿石",
+      "average": [121, 141, 140]
+    },
+    {
+      "id": "podzol",
+      "cn": "灰化土",
+      "average": [122, 87, 57]
+    },
+    {
+      "id": "dirt_with_roots",
+      "cn": "缠根泥土",
+      "average": [144, 103, 76]
+    },
+    {
+      "id": "dispenser",
+      "cn": "发射器",
+      "average": [122, 121, 121]
+    },
+    {
+      "id": "dried_kelp_block",
+      "cn": "干海带块",
+      "average": [38, 48, 29]
+    },
+    {
+      "id": "dripstone_block",
+      "cn": "滴水石块",
+      "average": [134, 107, 92]
+    },
+    {
+      "id": "dropper",
+      "cn": "投掷器",
+      "average": [122, 121, 121]
+    },
+    {
+      "id": "emerald_block",
+      "cn": "绿宝石块",
+      "average": [42, 203, 87]
+    },
+    {
+      "id": "emerald_ore",
+      "cn": "绿宝石矿石",
+      "average": [108, 136, 115]
+    },
+    {
+      "id": "end_portal_frame",
+      "cn": "末地传送门框架",
+      "average": [91, 120, 97]
+    },
+    {
+      "id": "exposed_copper",
+      "cn": "斑驳的铜块",
+      "average": [161, 125, 103]
+    },
+    {
+      "id": "exposed_cut_copper",
+      "cn": "斑驳的切制铜块",
+      "average": [154, 121, 101]
+    },
+    {
+      "id": "fletching_table",
+      "cn": "制箭台",
+      "average": [191, 167, 129]
+    },
+    {
+      "id": "furnace",
+      "cn": "熔炉",
+      "average": [91, 91, 91]
+    },
+    {
+      "id": "lit_furnace",
+      "cn": "燃烧中的熔炉",
+      "average": [121, 112, 93]
+    },
+    {
+      "id": "gilded_blackstone",
+      "cn": "镶金黑石",
+      "average": [55, 42, 38]
+    },
+    {
+      "id": "black_glazed_terracotta",
+      "cn": "黑色带釉陶瓦",
+      "average": [67, 30, 32]
+    },
+    {
+      "id": "blue_glazed_terracotta",
+      "cn": "蓝色带釉陶瓦",
+      "average": [47, 64, 139]
+    },
+    {
+      "id": "brown_glazed_terracotta",
+      "cn": "棕色带釉陶瓦",
+      "average": [119, 106, 85]
+    },
+    {
+      "id": "cyan_glazed_terracotta",
+      "cn": "青色带釉陶瓦",
+      "average": [52, 118, 125]
+    },
+    {
+      "id": "gray_glazed_terracotta",
+      "cn": "灰色带釉陶瓦",
+      "average": [83, 90, 93]
+    },
+    {
+      "id": "green_glazed_terracotta",
+      "cn": "绿色带釉陶瓦",
+      "average": [117, 142, 67]
+    },
+    {
+      "id": "light_blue_glazed_terracotta",
+      "cn": "淡蓝色带釉陶瓦",
+      "average": [94, 164, 208]
+    },
+    {
+      "id": "lime_glazed_terracotta",
+      "cn": "黄绿色带釉陶瓦",
+      "average": [162, 197, 55]
+    },
+    {
+      "id": "magenta_glazed_terracotta",
+      "cn": "品红色带釉陶瓦",
+      "average": [208, 100, 191]
+    },
+    {
+      "id": "orange_glazed_terracotta",
+      "cn": "橙色带釉陶瓦",
+      "average": [154, 147, 91]
+    },
+    {
+      "id": "pink_glazed_terracotta",
+      "cn": "粉红色带釉陶瓦",
+      "average": [235, 154, 181]
+    },
+    {
+      "id": "purple_glazed_terracotta",
+      "cn": "紫色带釉陶瓦",
+      "average": [109, 48, 152]
+    },
+    {
+      "id": "red_glazed_terracotta",
+      "cn": "红色带釉陶瓦",
+      "average": [181, 59, 53]
+    },
+    {
+      "id": "silver_glazed_terracotta",
+      "cn": "淡灰色带釉陶瓦",
+      "average": [144, 166, 167]
+    },
+    {
+      "id": "white_glazed_terracotta",
+      "cn": "白色带釉陶瓦",
+      "average": [188, 212, 202]
+    },
+    {
+      "id": "yellow_glazed_terracotta",
+      "cn": "黄色带釉陶瓦",
+      "average": [234, 192, 88]
+    },
+    {
+      "id": "glowstone",
+      "cn": "荧石",
+      "average": [171, 131, 84]
+    },
+    {
+      "id": "gold_block",
+      "cn": "金块",
+      "average": [246, 208, 61]
+    },
+    {
+      "id": "gold_ore",
+      "cn": "金矿石",
+      "average": [145, 133, 106]
+    },
+    {
+      "id": "gravel",
+      "cn": "沙砾",
+      "average": [131, 127, 126]
+    },
+    {
+      "id": "hardened_clay",
+      "cn": "陶瓦",
+      "average": [152, 94, 67]
+    },
+    {
+      "id": "black_terracotta",
+      "cn": "黑色陶瓦",
+      "average": [37, 22, 16]
+    },
+    {
+      "id": "blue_terracotta",
+      "cn": "蓝色陶瓦",
+      "average": [74, 59, 91]
+    },
+    {
+      "id": "brown_terracotta",
+      "cn": "棕色陶瓦",
+      "average": [77, 51, 35]
+    },
+    {
+      "id": "cyan_terracotta",
+      "cn": "青色陶瓦",
+      "average": [86, 91, 91]
+    },
+    {
+      "id": "gray_terracotta",
+      "cn": "灰色陶瓦",
+      "average": [57, 42, 35]
+    },
+    {
+      "id": "green_terracotta",
+      "cn": "绿色陶瓦",
+      "average": [76, 83, 42]
+    },
+    {
+      "id": "light_blue_terracotta",
+      "cn": "淡蓝色陶瓦",
+      "average": [113, 108, 137]
+    },
+    {
+      "id": "lime_terracotta",
+      "cn": "黄绿色陶瓦",
+      "average": [103, 117, 52]
+    },
+    {
+      "id": "magenta_terracotta",
+      "cn": "品红色陶瓦",
+      "average": [149, 88, 108]
+    },
+    {
+      "id": "orange_terracotta",
+      "cn": "橙色陶瓦",
+      "average": [161, 83, 37]
+    },
+    {
+      "id": "pink_terracotta",
+      "cn": "粉红色陶瓦",
+      "average": [161, 78, 78]
+    },
+    {
+      "id": "purple_terracotta",
+      "cn": "紫色陶瓦",
+      "average": [118, 70, 86]
+    },
+    {
+      "id": "red_terracotta",
+      "cn": "红色陶瓦",
+      "average": [143, 61, 46]
+    },
+    {
+      "id": "light_gray_terracotta",
+      "cn": "淡灰色陶瓦",
+      "average": [135, 106, 97]
+    },
+    {
+      "id": "white_terracotta",
+      "cn": "白色陶瓦",
+      "average": [209, 178, 161]
+    },
+    {
+      "id": "yellow_terracotta",
+      "cn": "黄色陶瓦",
+      "average": [186, 133, 35]
+    },
+    {
+      "id": "hay_block",
+      "cn": "干草捆",
+      "average": [166, 136, 38]
+    },
+    {
+      "id": "crimson_hyphae",
+      "cn": "绯红菌核",
+      "average": [92, 25, 29]
+    },
+    {
+      "id": "crimson_stem",
+      "cn": "绯红菌柄",
+      "average": [112, 49, 70]
+    },
+    {
+      "id": "stripped_crimson_hyphae",
+      "cn": "去皮绯红菌核",
+      "average": [137, 57, 90]
+    },
+    {
+      "id": "stripped_crimson_stem",
+      "cn": "去皮绯红菌核",
+      "average": [121, 56, 82]
+    },
+    {
+      "id": "stripped_warped_hyphae",
+      "cn": "去皮诡异菌核",
+      "average": [57, 150, 147]
+    },
+    {
+      "id": "stripped_warped_stem",
+      "cn": "去皮诡异菌柄",
+      "average": [52, 128, 124]
+    },
+    {
+      "id": "warped_hyphae",
+      "cn": "诡异菌核",
+      "average": [58, 58, 77]
+    },
+    {
+      "id": "warped_stem",
+      "cn": "诡异菌柄",
+      "average": [53, 109, 110]
+    },
+    {
+      "id": "packed_ice",
+      "cn": "浮冰",
+      "average": [141, 180, 250]
+    },
+    {
+      "id": "iron_ore",
+      "cn": "铁矿石",
+      "average": [136, 129, 122]
+    },
+    {
+      "id": "jukebox",
+      "cn": "唱片机",
+      "average": [88, 58, 40]
+    },
+    {
+      "id": "lapis_block",
+      "cn": "青金石块",
+      "average": [30, 67, 140]
+    },
+    {
+      "id": "lapis_ore",
+      "cn": "青金石矿石",
+      "average": [107, 117, 141]
+    },
+    {
+      "id": "acacia_wood",
+      "cn": "金合欢木",
+      "average": [103, 96, 86]
+    },
+    {
+      "id": "acacia_log",
+      "cn": "金合欢原木",
+      "average": [150, 88, 55]
+    },
+    {
+      "id": "dark_oak_log",
+      "cn": "深色橡木原木",
+      "average": [67, 45, 22]
+    },
+    {
+      "id": "birch_wood",
+      "cn": "白桦木",
+      "average": [216, 215, 210]
+    },
+    {
+      "id": "birch_log",
+      "cn": "白桦原木",
+      "average": [193, 179, 135]
+    },
+    {
+      "id": "jungle_wood",
+      "cn": "丛林木",
+      "average": [85, 67, 25]
+    },
+    {
+      "id": "jungle_log",
+      "cn": "丛林原木",
+      "average": [149, 109, 70]
+    },
+    {
+      "id": "oak_wood",
+      "cn": "橡木",
+      "average": [109, 85, 50]
+    },
+    {
+      "id": "oak_log",
+      "cn": "橡木原木",
+      "average": [151, 121, 73]
+    },
+    {
+      "id": "spruce_wood",
+      "cn": "云杉木",
+      "average": [58, 37, 16]
+    },
+    {
+      "id": "spruce_log",
+      "cn": "云杉原木",
+      "average": [108, 80, 46]
+    },
+    {
+      "id": "loom",
+      "cn": "织布机",
+      "average": [76, 60, 36]
+    },
+    {
+      "id": "magma",
+      "cn": "岩浆块",
+      "average": [142, 63, 31]
+    },
+    {
+      "id": "mangrove_log",
+      "cn": "红树原木",
+      "average": [83, 66, 41]
+    },
+    {
+      "id": "melon_block",
+      "cn": "西瓜",
+      "average": [114, 146, 30]
+    },
+    {
+      "id": "moss_block",
+      "cn": "苔藓块",
+      "average": [89, 109, 45]
+    },
+    {
+      "id": "mud",
+      "cn": "泥巴",
+      "average": [60, 57, 60]
+    },
+    {
+      "id": "muddy_mangrove_roots",
+      "cn": "沾泥的红树根",
+      "average": [68, 58, 48]
+    },
+    {
+      "id": "mud_brick_double_slab",
+      "cn": "泥砖双层台阶",
+      "average": [137, 103, 79]
+    },
+    {
+      "id": "netherite_block",
+      "cn": "下界合金块",
+      "average": [66, 61, 63]
+    },
+    {
+      "id": "nether_brick",
+      "cn": "下界砖块",
+      "average": [44, 21, 26]
+    },
+    {
+      "id": "nether_gold_ore",
+      "cn": "下界金矿石",
+      "average": [115, 54, 42]
+    },
+    {
+      "id": "nether_wart_block",
+      "cn": "下界疣块",
+      "average": [114, 3, 2]
+    },
+    {
+      "id": "noteblock",
+      "cn": "音符盒",
+      "average": [88, 58, 40]
+    },
+    {
+      "id": "obsidian",
+      "cn": "黑曜石",
+      "average": [15, 10, 24]
+    },
+    {
+      "id": "ochre_froglight",
+      "cn": "赭黄蛙明灯",
+      "average": [245, 233, 181]
+    },
+    {
+      "id": "oxidized_copper",
+      "cn": "氧化的铜块",
+      "average": [82, 162, 132]
+    },
+    {
+      "id": "oxidized_cut_copper",
+      "cn": "氧化的切制铜块",
+      "average": [79, 153, 126]
+    },
+    {
+      "id": "packed_mud",
+      "cn": "泥坯",
+      "average": [142, 106, 79]
+    },
+    {
+      "id": "pearlescent_froglight",
+      "cn": "珠光蛙明灯",
+      "average": [235, 224, 228]
+    },
+    {
+      "id": "polished_basalt",
+      "cn": "磨制玄武岩",
+      "average": [88, 88, 91]
+    },
+    {
+      "id": "polished_blackstone",
+      "cn": "磨制黑石",
+      "average": [53, 48, 56]
+    },
+    {
+      "id": "polished_blackstone_brick_double_slab",
+      "cn": "磨制黑石砖双层台阶",
+      "average": [48, 42, 49]
+    },
+    {
+      "id": "powder_snow",
+      "cn": "细雪",
+      "average": [248, 253, 253]
+    },
+    {
+      "id": "quartz_bricks",
+      "cn": "石英砖",
+      "average": [234, 229, 221]
+    },
+    {
+      "id": "quartz_ore",
+      "cn": "下界石英矿石",
+      "average": [117, 65, 62]
+    },
+    {
+      "id": "raw_copper_block",
+      "cn": "粗铜块",
+      "average": [154, 105, 79]
+    },
+    {
+      "id": "raw_gold_block",
+      "cn": "粗金块",
+      "average": [221, 169, 46]
+    },
+    {
+      "id": "raw_iron_block",
+      "cn": "粗铁块",
+      "average": [166, 135, 107]
+    },
+    {
+      "id": "redstone_block",
+      "cn": "红石块",
+      "average": [175, 24, 5]
+    },
+    {
+      "id": "redstone_lamp",
+      "cn": "红石灯",
+      "average": [95, 54, 30]
+    },
+    {
+      "id": "lit_redstone_ore",
+      "cn": "点亮的红石矿石",
+      "average": [140, 109, 109]
+    },
+    {
+      "id": "red_nether_brick",
+      "cn": "红色下界砖块",
+      "average": [69, 7, 9]
+    },
+    {
+      "id": "reinforced_deepslate",
+      "cn": "强化深板岩",
+      "average": [79, 82, 79]
+    },
+    {
+      "id": "repeating_command_block",
+      "cn": "循环型命令方块",
+      "average": [121, 105, 162]
+    },
+    {
+      "id": "sculk",
+      "cn": "幽匿块",
+      "average": [12, 29, 36]
+    },
+    {
+      "id": "sea_lantern",
+      "cn": "海晶灯",
+      "average": [172, 199, 190]
+    },
+    {
+      "id": "shroomlight",
+      "cn": "菌光体",
+      "average": [240, 146, 70]
+    },
+    {
+      "id": "smithing_table",
+      "cn": "锻造台",
+      "average": [64, 28, 23]
+    },
+    {
+      "id": "smoker",
+      "cn": "烟熏炉",
+      "average": [87, 75, 57]
+    },
+    {
+      "id": "lit_smoker",
+      "cn": "燃烧中的烟熏炉",
+      "average": [118, 97, 66]
+    },
+    {
+      "id": "smooth_basalt",
+      "cn": "平滑玄武岩",
+      "average": [72, 72, 78]
+    },
+    {
+      "id": "snow",
+      "cn": "雪块",
+      "average": [249, 254, 254]
+    },
+    {
+      "id": "soul_sand",
+      "cn": "灵魂沙",
+      "average": [81, 62, 50]
+    },
+    {
+      "id": "soul_soil",
+      "cn": "灵魂土",
+      "average": [75, 57, 46]
+    },
+    {
+      "id": "smooth_stone",
+      "cn": "平滑石头",
+      "average": [158, 158, 158]
+    },
+    {
+      "id": "stripped_acacia_wood",
+      "cn": "去皮金合欢木",
+      "average": [174, 92, 59]
+    },
+    {
+      "id": "stripped_acacia_log",
+      "cn": "去皮金合欢原木",
+      "average": [166, 91, 51]
+    },
+    {
+      "id": "stripped_bamboo_block",
+      "cn": "去皮竹块",
+      "average": [193, 173, 80]
+    },
+    {
+      "id": "stripped_birch_wood",
+      "cn": "去皮白桦木",
+      "average": [196, 176, 118]
+    },
+    {
+      "id": "stripped_birch_log",
+      "cn": "去皮白桦原木",
+      "average": [191, 171, 116]
+    },
+    {
+      "id": "stripped_cherry_log",
+      "cn": "去皮樱花原木",
+      "average": [215, 145, 148]
+    },
+    {
+      "id": "stripped_dark_oak_wood",
+      "cn": "去皮深色橡木",
+      "average": [72, 56, 36]
+    },
+    {
+      "id": "stripped_dark_oak_log",
+      "cn": "去皮深色橡木原木",
+      "average": [65, 44, 22]
+    },
+    {
+      "id": "stripped_jungle_wood",
+      "cn": "去皮丛林木",
+      "average": [171, 132, 84]
+    },
+    {
+      "id": "stripped_jungle_log",
+      "cn": "去皮丛林原木",
+      "average": [165, 122, 81]
+    },
+    {
+      "id": "stripped_mangrove_log",
+      "cn": "去皮红树原木",
+      "average": [119, 54, 47]
+    },
+    {
+      "id": "stripped_oak_wood",
+      "cn": "去皮橡木",
+      "average": [177, 144, 86]
+    },
+    {
+      "id": "stripped_oak_log",
+      "cn": "去皮橡木原木",
+      "average": [160, 129, 77]
+    },
+    {
+      "id": "stripped_spruce_wood",
+      "cn": "去皮云杉木",
+      "average": [79, 60, 34]
+    },
+    {
+      "id": "stripped_spruce_log",
+      "cn": "去皮云杉原木",
+      "average": [105, 80, 46]
+    },
+    {
+      "id": "tnt",
+      "cn": "TNT",
+      "average": [166, 66, 53]
+    },
+    {
+      "id": "tuff",
+      "cn": "凝灰岩",
+      "average": [108, 109, 102]
+    },
+    {
+      "id": "verdant_froglight",
+      "cn": "青翠蛙明灯",
+      "average": [211, 234, 208]
+    },
+    {
+      "id": "warped_nylium",
+      "cn": "诡异菌岩",
+      "average": [72, 61, 59]
+    },
+    {
+      "id": "waxed_weathered_copper",
+      "cn": "涂蜡的锈蚀铜块",
+      "average": [108, 153, 110]
+    },
+    {
+      "id": "waxed_weathered_cut_copper",
+      "cn": "涂蜡的锈蚀切制铜块",
+      "average": [109, 145, 107]
+    },
+    {
+      "id": "white_wool",
+      "cn": "白色羊毛",
+      "average": [233, 236, 236]
+    },
+    {
+      "id": "orange_wool",
+      "cn": "橙色羊毛",
+      "average": [240, 118, 19]
+    },
+    {
+      "id": "magenta_wool",
+      "cn": "品红色羊毛",
+      "average": [189, 68, 179]
+    },
+    {
+      "id": "light_blue_wool",
+      "cn": "淡蓝色羊毛",
+      "average": [58, 175, 217]
+    },
+    {
+      "id": "yellow_wool",
+      "cn": "黄色羊毛",
+      "average": [248, 198, 39]
+    },
+    {
+      "id": "lime_wool",
+      "cn": "黄绿色羊毛",
+      "average": [112, 185, 25]
+    },
+    {
+      "id": "pink_wool",
+      "cn": "粉红色羊毛",
+      "average": [237, 141, 172]
+    },
+    {
+      "id": "gray_wool",
+      "cn": "灰色羊毛",
+      "average": [62, 68, 71]
+    },
+    {
+      "id": "light_gray_wool",
+      "cn": "淡灰色羊毛",
+      "average": [142, 142, 134]
+    },
+    {
+      "id": "cyan_wool",
+      "cn": "青色羊毛",
+      "average": [21, 137, 145]
+    },
+    {
+      "id": "purple_wool",
+      "cn": "紫色羊毛",
+      "average": [121, 42, 172]
+    },
+    {
+      "id": "blue_wool",
+      "cn": "蓝色羊毛",
+      "average": [53, 57, 157]
+    },
+    {
+      "id": "brown_wool",
+      "cn": "棕色羊毛",
+      "average": [114, 71, 40]
+    },
+    {
+      "id": "green_wool",
+      "cn": "绿色羊毛",
+      "average": [84, 109, 27]
+    },
+    {
+      "id": "red_wool",
+      "cn": "红色羊毛",
+      "average": [161, 39, 34]
+    },
+    {
+      "id": "black_wool",
+      "cn": "黑色羊毛",
+      "average": [20, 21, 25]
+    }
+  ]
+}

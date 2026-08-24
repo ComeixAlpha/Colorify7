@@ -1,0 +1,79 @@
+{
+  "palette": [
+    {
+      "id": "black_carpet",
+      "cn": "黑色地毯",
+      "average": [20, 21, 25]
+    },
+    {
+      "id": "blue_carpet",
+      "cn": "蓝色地毯",
+      "average": [53, 57, 157]
+    },
+    {
+      "id": "brown_carpet",
+      "cn": "棕色地毯",
+      "average": [114, 71, 40]
+    },
+    {
+      "id": "cyan_carpet",
+      "cn": "青色地毯",
+      "average": [21, 137, 145]
+    },
+    {
+      "id": "gray_carpet",
+      "cn": "灰色地毯",
+      "average": [62, 68, 71]
+    },
+    {
+      "id": "green_carpet",
+      "cn": "绿色地毯",
+      "average": [84, 109, 27]
+    },
+    {
+      "id": "light_blue_carpet",
+      "cn": "淡蓝色地毯",
+      "average": [58, 175, 217]
+    },
+    {
+      "id": "lime_carpet",
+      "cn": "黄绿色地毯",
+      "average": [112, 185, 25]
+    },
+    {
+      "id": "magenta_carpet",
+      "cn": "品红色地毯",
+      "average": [189, 68, 179]
+    },
+    {
+      "id": "orange_carpet",
+      "cn": "橙色地毯",
+      "average": [240, 118, 19]
+    },
+    {
+      "id": "pink_carpet",
+      "cn": "粉红色地毯",
+      "average": [237, 141, 172]
+    },
+    {
+      "id": "purple_carpet",
+      "cn": "紫色地毯",
+      "average": [121, 42, 172]
+    },
+    {
+      "id": "red_carpet",
+      "cn": "红色地毯",
+      "average": [160, 39, 34]
+    },
+    {
+      "id": "white_carpet",
+      "cn": "白色地毯",
+      "average": [233, 236, 236]
+    },
+    {
+      "id": "yellow_carpet",
+      "cn": "黄色地毯",
+      "average": [248, 197, 39]
+    }
+  ]
+}

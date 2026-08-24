@@ -1,0 +1,55 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependencies
+node_modules
+
+# Build outputs
+dist
+dist-ssr
+*.local
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Secrets & signing keys (NEVER commit)
+*.keystore
+*.jks
+*.p12
+*.pfx
+*.pem
+*.key
+key.properties
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Testing / coverage
+coverage
+
+# Tool-generated modernization plans (internal, do not publish)
+.github/modernize/
+
+scripts
