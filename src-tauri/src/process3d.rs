@@ -1,4 +1,4 @@
-//! 3D 建筑管线：OBJ → 体素 → 方块 → 导出 / WebSocket
+//! 3D 建筑管线：OBJ -> 体素 -> 方块 -> 导出 / WebSocket
 
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -89,6 +89,13 @@ pub struct ObjParams {
     pub offset_z: Option<i32>,
     pub use_socket: bool,
     pub ws_command_delay: i32,
+
+    #[serde(default)]
+    pub use_ldb: bool,
+    pub world_path: Option<String>,
+    pub origin_x: Option<i32>,
+    pub origin_y: Option<i32>,
+    pub origin_z: Option<i32>,
 }
 
 /// 处理 OBJ
@@ -366,7 +373,7 @@ fn run_pipeline(
     });
 
     // 导出
-    let out_dir = if params.use_socket {
+    let out_dir = if params.use_socket || params.use_ldb {
         None
     } else {
         Some(output_dir(app)?)
@@ -394,6 +401,34 @@ fn run_pipeline(
             )
         })
         .collect();
+
+    // 直写 LevelDB 世界
+    if params.use_ldb {
+        let world_path = params.world_path.as_deref().ok_or("未选择世界路径")?;
+        let origin = [
+            params.origin_x.unwrap_or(0),
+            params.origin_y.unwrap_or(0),
+            params.origin_z.unwrap_or(0),
+        ];
+        let offset = [
+            params.offset_x.unwrap_or(0),
+            params.offset_y.unwrap_or(0),
+            params.offset_z.unwrap_or(0),
+        ];
+        let blocks: Vec<(i32, i32, i32, String)> = refs
+            .iter()
+            .map(|(x, y, z, n)| {
+                (
+                    x + offset[0],
+                    y + offset[1],
+                    z + offset[2],
+                    (*n).to_string(),
+                )
+            })
+            .collect();
+        crate::ldb::write_blocks_to_world(world_path, 0, origin, &blocks, progress)?;
+        return Ok(None);
+    }
 
     let commands = generator::export_blocks_3d(
         &refs,

@@ -1,6 +1,5 @@
 import {
   M3eButton,
-  M3eCircularProgressIndicator,
   M3eFab,
   M3eFabMenu,
   M3eFabMenuItem,
@@ -30,6 +29,8 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
 import bedrockAtlas from "../assets/bedrock_atlas.json";
 import bedrockAtlasPngUrl from "../assets/bedrock_atlas.png?url";
+import TaskOverlay from "../components/TaskOverlay";
+import WorldPicker, { type WorldInfo } from "../components/WorldPicker";
 import { useIsNarrow } from "../hooks/useIsNarrow";
 import { PageState } from "../session/PageState";
 import { Storer } from "../stores/storer";
@@ -57,6 +58,11 @@ export interface ObjParams {
   gameVersion: string | null;
   useSocket: boolean;
   wsCommandDelay: number;
+  useLdb: boolean;
+  worldPath: string;
+  originX: number | null;
+  originY: number | null;
+  originZ: number | null;
 }
 
 export class ObjToVoxelPageState extends PageState<ObjParams> {
@@ -84,6 +90,11 @@ export class ObjToVoxelPageState extends PageState<ObjParams> {
       gameVersion: "1.20.80",
       useSocket: false,
       wsCommandDelay: 10,
+      useLdb: false,
+      worldPath: "",
+      originX: null,
+      originY: null,
+      originZ: null,
     });
   }
 }
@@ -95,6 +106,7 @@ interface ProgressMessage {
   finished: boolean;
   elapsedMs?: number;
   outputDir?: string;
+  error?: string | null;
 }
 
 interface ResultInfo {
@@ -186,12 +198,6 @@ const TOOLBAR_ICON_STYLE: CSSProperties = {
   justifyContent: "center",
   lineHeight: 1,
 };
-
-function formatElapsed(ms: number): string {
-  const s = ms / 1000;
-  if (s < 60) return `${s.toFixed(1)} s`;
-  return `${Math.floor(s / 60)} min ${Math.round(s % 60)} s`;
-}
 
 export interface VoxelPreviewHandle {
   zoomIn: () => void;
@@ -304,6 +310,7 @@ const VoxelPreview = forwardRef<VoxelPreviewHandle, VoxelPreviewProps>(
           0x2a2a2a,
         );
         grid.position.set(center.x, fitMin.y - 1.5, center.z);
+        grid.visible = showGrid;
         gridRef.current = grid;
         scene.add(grid);
 
@@ -460,16 +467,19 @@ const VoxelPreview = forwardRef<VoxelPreviewHandle, VoxelPreviewProps>(
           0x2a2a2a,
         );
         grid.position.set(center.x, fitMin.y - 1, center.z);
+        grid.visible = showGrid;
         gridRef.current = grid;
         scene.add(grid);
       } else {
         const grid = new THREE.GridHelper(20, 20, 0x555555, 0x2a2a2a);
         grid.position.y = -0.5;
+        grid.visible = showGrid;
         gridRef.current = grid;
         scene.add(grid);
       }
 
       const axes = new THREE.AxesHelper(10);
+      axes.visible = showAxes;
       axesRef.current = axes;
       scene.add(axes);
 
@@ -609,13 +619,18 @@ export default function ObjToVoxelPage({
   const { t } = useTranslation();
   const { data, update } = objToVoxelPageState.use();
   const cancelledRef = useRef(false);
-  const modeRef = useRef<"file" | "socket">("file");
+  const modeRef = useRef<"file" | "socket" | "ldb">("file");
   const [processing, setProcessing] = useState(false);
   const [done, setDone] = useState(false);
+  const [doneError, setDoneError] = useState(false);
   const [progressText, setProgressText] = useState("");
   const [resultInfo, setResultInfo] = useState<ResultInfo>({});
   const [wsMode, setWsMode] = useState(false);
   const [wsRunning, setWsRunning] = useState(false);
+  const [worldChoices, setWorldChoices] = useState<WorldInfo[]>([]);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerLoading, setPickerLoading] = useState(false);
+  const [pickerError, setPickerError] = useState<string | null>(null);
   const [render, setRender] = useState<RenderData>(renderData);
   const [atlas, setAtlas] = useState<AtlasData | null>(null);
   const previewApiRef = useRef<VoxelPreviewHandle>(null);
@@ -769,7 +784,7 @@ export default function ObjToVoxelPage({
     }
   }
 
-  async function handleGenerate(mode: "file" | "socket") {
+  async function handleGenerate(mode: "file" | "socket" | "ldb") {
     if (!data.objPath) {
       await handleSelectModel();
       return;
@@ -778,6 +793,7 @@ export default function ObjToVoxelPage({
     cancelledRef.current = false;
     setProcessing(true);
     setDone(false);
+    setDoneError(false);
     setWsMode(mode === "socket");
     setProgressText(t("pages.obj3d.preparing"));
 
@@ -785,7 +801,14 @@ export default function ObjToVoxelPage({
     channel.onmessage = async (msg) => {
       if (msg.finished) {
         if (cancelledRef.current) return;
+        if (msg.error) {
+          setDone(true);
+          setDoneError(true);
+          setProgressText(msg.error);
+          return;
+        }
         setDone(true);
+        setDoneError(false);
         setResultInfo({ elapsedMs: msg.elapsedMs, outputDir: msg.outputDir });
         setProgressText(t("pages.obj3d.taskComplete"));
         if (!isAndroid) {
@@ -805,6 +828,11 @@ export default function ObjToVoxelPage({
           ...data,
           objData: isAndroid && objData ? objData : null,
           useSocket: mode === "socket",
+          useLdb: mode === "ldb",
+          worldPath: mode === "ldb" ? data.worldPath : null,
+          originX: mode === "ldb" ? data.originX : null,
+          originY: mode === "ldb" ? data.originY : null,
+          originZ: mode === "ldb" ? data.originZ : null,
           autoSliceMcfunction:
             Storer.load<AppSettings>("settings").autoSliceMcfunction,
         },
@@ -813,6 +841,8 @@ export default function ObjToVoxelPage({
       console.log("process_obj resolved, 后台线程继续运行");
     } catch (err) {
       console.error("process_obj failed:", err);
+      setDone(true);
+      setDoneError(true);
       setProgressText(typeof err === "string" ? err : String(err));
     }
   }
@@ -825,6 +855,38 @@ export default function ObjToVoxelPage({
       await invoke("cancel_obj_process");
     } catch (err) {
       console.error("cancel_obj_process failed:", err);
+    }
+  }
+
+  /// 浏览世界文件夹（直写 LevelDB 用）：桌面用系统目录选择器，安卓用世界发现列表
+  async function handleBrowseWorld() {
+    if (isAndroid) {
+      setPickerLoading(true);
+      setPickerOpen(true);
+      setPickerError(null);
+      try {
+        const worlds = await invoke<WorldInfo[]>("ldb_list_world_dirs");
+        setWorldChoices(worlds);
+      } catch (err) {
+        console.error("ldb_discover_worlds failed:", err);
+        setWorldChoices([]);
+        setPickerError(typeof err === "string" ? err : String(err));
+      } finally {
+        setPickerLoading(false);
+      }
+      return;
+    }
+    try {
+      const path = await open({
+        title: t("pages.obj3d.selectWorldTitle"),
+        directory: true,
+      });
+      if (typeof path === "string" && path) {
+        update({ worldPath: path });
+      }
+    } catch (err) {
+      console.error("open world dialog failed:", err);
+      setPickerError(typeof err === "string" ? err : String(err));
     }
   }
 
@@ -1411,6 +1473,75 @@ export default function ObjToVoxelPage({
             </div>
           </div>
 
+          {/* 直写 LevelDB 世界 */}
+          <div className="flex w-full items-center justify-between gap-4">
+            <div className="flex w-full items-center justify-between gap-3">
+              <div className="flex min-w-0 flex-col">
+                <span className="font-medium">{t("pages.obj3d.argLdb")}</span>
+                <span className="text-sm text-md-on-surface-variant">
+                  {t("pages.obj3d.argLdbDesc")}
+                </span>
+              </div>
+              <M3eSwitch
+                checked={data.useLdb}
+                onChange={handleSwitchChange("useLdb")}
+                className="shrink-0"
+              />
+            </div>
+          </div>
+          {data.useLdb && (
+            <div className="flex w-full min-w-0 flex-col gap-3">
+              {/* 世界路径 */}
+              <div className="flex w-full min-w-0 items-center justify-between gap-4">
+                <div className="flex min-w-0 flex-1 flex-col">
+                  <span className="font-medium">
+                    {t("pages.obj3d.argLdbWorldPath")}
+                  </span>
+                  <span className="truncate text-sm text-md-on-surface-variant">
+                    {data.worldPath ||
+                      t("pages.obj3d.argLdbWorldPathPlaceholder")}
+                  </span>
+                </div>
+                <M3eButton
+                  variant="tonal"
+                  size="small"
+                  className="shrink-0"
+                  onClick={handleBrowseWorld}
+                >
+                  {t("pages.obj3d.argLdbBrowse")}
+                </M3eButton>
+              </div>
+              {/* 生成坐标 */}
+              <div className="flex flex-col gap-2">
+                <span className="font-medium">
+                  {t("pages.obj3d.argLdbOrigin")}
+                </span>
+                <div className="flex w-full min-w-0 gap-2">
+                  {(["originX", "originY", "originZ"] as const).map(
+                    (field, i) => (
+                      <M3eFormField
+                        key={field}
+                        className="flex-1 shrink-0"
+                        hideSubscript="always"
+                      >
+                        <label slot="label" htmlFor={`obj-ldb-${field}`}>
+                          {["X", "Y", "Z"][i]}
+                        </label>
+                        <input
+                          id={`obj-ldb-${field}`}
+                          type="number"
+                          value={data[field] ?? ""}
+                          onChange={handleNumberChange(field)}
+                          className="w-full bg-transparent text-left outline-none"
+                        />
+                      </M3eFormField>
+                    ),
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* WS 命令延迟 */}
           <div className="flex items-center justify-between gap-4">
             <div className="flex min-w-0 flex-col items-start gap-3">
@@ -1617,69 +1748,66 @@ export default function ObjToVoxelPage({
               {t("pages.obj3d.generateWs")}
             </M3eFabMenuItem>
           </div>
+          <div
+            title={
+              data.useLdb && data.worldPath
+                ? undefined
+                : t("pages.obj3d.ldbNeedsWorld")
+            }
+          >
+            <M3eFabMenuItem
+              disabled={!data.objPath || !data.useLdb || !data.worldPath}
+              onClick={() => handleGenerate("ldb")}
+            >
+              <M3eIcon slot="icon" name="storage" filled />
+              {t("pages.obj3d.generateLdb")}
+            </M3eFabMenuItem>
+          </div>
         </M3eFabMenu>
       </div>
 
-      {/* 遮罩 */}
-      {processing && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-md-scrim/60">
-          <div className="flex items-center gap-6 rounded-md-xl bg-md-surface-container px-8 py-6 shadow-lg">
-            {done ? (
-              <>
-                <M3eIcon
-                  name="done_all"
-                  filled
-                  className="text-3xl text-md-primary"
-                />
-                <div className="flex max-w-md flex-col gap-1">
-                  <span className="text-md-on-surface">{progressText}</span>
-                  {wsMode ? (
-                    <span className="text-sm text-md-on-surface-variant">
-                      {t("pages.obj3d.wsGoPageHint")}
-                    </span>
-                  ) : (
-                    <>
-                      {resultInfo.elapsedMs != null && (
-                        <span className="text-sm text-md-on-surface-variant">
-                          {t("pages.obj3d.elapsedLabel")}{" "}
-                          {formatElapsed(resultInfo.elapsedMs)}
-                        </span>
-                      )}
-                      {resultInfo.outputDir && (
-                        <span className="break-all text-sm text-md-on-surface-variant">
-                          {t("pages.obj3d.outputLabel")} {resultInfo.outputDir}
-                        </span>
-                      )}
-                    </>
-                  )}
-                </div>
-                {wsMode ? (
-                  <>
-                    <M3eButton variant="filled" onClick={handleWsGoPage}>
-                      {t("pages.obj3d.wsGoPage")}
-                    </M3eButton>
-                    <M3eButton variant="tonal" onClick={handleDoneOk}>
-                      {t("pages.obj3d.wsNoThanks")}
-                    </M3eButton>
-                  </>
-                ) : (
-                  <M3eButton onClick={handleDoneOk}>OK</M3eButton>
-                )}
-              </>
-            ) : (
-              <>
-                <M3eCircularProgressIndicator variant="wavy" indeterminate />
-                <span className="min-w-40 text-md-on-surface">
-                  {progressText}
-                </span>
-                <M3eButton onClick={handleCancel}>
-                  {t("pages.obj3d.cancel")}
-                </M3eButton>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+      <TaskOverlay
+        processing={processing}
+        done={done}
+        error={doneError}
+        progressText={progressText}
+        wsMode={wsMode}
+        resultInfo={resultInfo}
+        wsHint={t("pages.obj3d.wsGoPageHint")}
+        wsGoPageLabel={t("pages.obj3d.wsGoPage")}
+        wsNoThanksLabel={t("pages.obj3d.wsNoThanks")}
+        elapsedLabel={t("pages.obj3d.elapsedLabel")}
+        outputLabel={t("pages.obj3d.outputLabel")}
+        cancelLabel={t("pages.obj3d.cancel")}
+        onCancel={handleCancel}
+        onDoneOk={handleDoneOk}
+        onWsGoPage={handleWsGoPage}
+      />
+
+      <WorldPicker
+        open={pickerOpen}
+        worlds={worldChoices}
+        loading={pickerLoading}
+        error={pickerError ?? undefined}
+        title={t("pages.obj3d.selectWorldTitle")}
+        emptyText={t("pages.obj3d.argLdbNoWorld")}
+        hint={t("pages.obj3d.argLdbWorldDirHint")}
+        onOpenSettings={
+          isAndroid
+            ? () => {
+                invoke("open_all_files_settings").catch((err) =>
+                  console.error("open settings failed:", err),
+                );
+              }
+            : undefined
+        }
+        settingsLabel={t("pages.obj3d.argLdbOpenSettings")}
+        onSelect={(path) => {
+          update({ worldPath: path });
+          setPickerOpen(false);
+        }}
+        onClose={() => setPickerOpen(false)}
+      />
     </div>
   );
 }

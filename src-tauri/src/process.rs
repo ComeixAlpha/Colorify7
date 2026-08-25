@@ -41,16 +41,29 @@ impl<'a> ProgressSink<'a> {
             finished: false,
             elapsed_ms: None,
             output_dir: None,
+            error: None,
         });
     }
 
-    /// 结束消息
+    /// 成功
     pub(crate) fn finish(&self, name: &str, output_dir: Option<String>) {
         let _ = self.channel.send(ProgressMessage {
             stage: name.to_string(),
             finished: true,
             elapsed_ms: Some(self.elapsed()),
             output_dir,
+            error: None,
+        });
+    }
+
+    /// 失败
+    pub(crate) fn fail(&self, name: &str) {
+        let _ = self.channel.send(ProgressMessage {
+            stage: name.to_string(),
+            finished: true,
+            elapsed_ms: Some(self.elapsed()),
+            output_dir: None,
+            error: Some(name.to_string()),
         });
     }
 
@@ -89,6 +102,7 @@ pub(crate) fn run_art_pipeline(
     interpolation: &str,
     max_pixels: Option<u64>,
     use_socket: bool,
+    use_ldb: bool,
     ws_delay_ms: u64,
     generator: &dyn ArtGenerator,
     progress: &ProgressSink,
@@ -109,7 +123,7 @@ pub(crate) fn run_art_pipeline(
         .ok_or("图片缩放失败")?;
 
     // 输出目录
-    let out_dir = if use_socket {
+    let out_dir = if use_socket || use_ldb {
         None
     } else {
         Some(output_dir(app)?)
@@ -165,7 +179,7 @@ pub(crate) fn spawn_art_task(
                 Ok(Err(msg)) => {
                     eprintln!("[{tag}] 失败: {msg}");
                     if msg != "已取消" {
-                        progress.finish(&msg, None);
+                        progress.fail(&msg);
                     }
                 }
                 Err(panic) => {
@@ -174,7 +188,7 @@ pub(crate) fn spawn_art_task(
                         .copied()
                         .unwrap_or("未知内部错误");
                     eprintln!("[{tag}] 内部错误: {msg}");
-                    progress.finish(&format!("内部错误: {msg}"), None);
+                    progress.fail(&format!("内部错误: {msg}"));
                 }
             }
         })
@@ -200,7 +214,7 @@ pub(crate) fn output_dir(app: &tauri::AppHandle) -> Result<PathBuf, String> {
     std::fs::create_dir_all(&dir).map_err(|e| {
         #[cfg(target_os = "android")]
         if e.kind() == std::io::ErrorKind::PermissionDenied {
-            return "无法写入 Download 目录。请在系统设置中授予 Colorify「所有文件访问」权限（设置 → 应用 → Colorify → 所有文件访问）"
+            return "无法写入 Download 目录。请在系统设置中授予 Colorify「所有文件访问」权限（设置 -> 应用 -> Colorify -> 所有文件访问）"
                 .to_string();
         }
         format!("创建输出目录失败: {e}")

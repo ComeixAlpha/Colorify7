@@ -1,6 +1,5 @@
 import {
   M3eButton,
-  M3eCircularProgressIndicator,
   M3eFab,
   M3eFabMenu,
   M3eFabMenuItem,
@@ -15,12 +14,15 @@ import {
 } from "@m3e/react/all";
 import "@m3e/web/fab-menu";
 import { Channel, invoke } from "@tauri-apps/api/core";
+import { open } from "@tauri-apps/plugin-dialog";
 import type { ChangeEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import carpet_palette from "../assets/carpet_palette.json";
 import pixel_palette from "../assets/pixel_palette.json";
 import staircase_palette from "../assets/staircase_palette.json";
+import TaskOverlay from "../components/TaskOverlay";
+import WorldPicker, { type WorldInfo } from "../components/WorldPicker";
 import { useIsNarrow } from "../hooks/useIsNarrow";
 import { PageState } from "../session/PageState";
 import { Storer } from "../stores/storer";
@@ -99,6 +101,7 @@ interface ProgressMessage {
   finished: boolean;
   elapsedMs?: number;
   outputDir?: string;
+  error?: string | null;
 }
 
 interface ResultInfo {
@@ -134,6 +137,11 @@ export interface PixelParams {
   pkName: string;
   pkAuth: string;
   pkDesc: string;
+  useLdb: boolean;
+  worldPath: string;
+  originX: number | null;
+  originY: number | null;
+  originZ: number | null;
 }
 
 export class PixelPageState extends PageState<PixelParams> {
@@ -160,21 +168,16 @@ export class PixelPageState extends PageState<PixelParams> {
       pkName: "",
       pkAuth: "",
       pkDesc: "",
+      useLdb: false,
+      worldPath: "",
+      originX: null,
+      originY: null,
+      originZ: null,
     });
   }
 }
 
 export const pixelPageState = new PixelPageState();
-
-function formatElapsed(ms: number): string {
-  const s = ms / 1000;
-  if (s < 60) {
-    return `${s.toFixed(1)} s`;
-  }
-  const m = Math.floor(s / 60);
-  const rest = Math.round(s % 60);
-  return `${m} min ${rest} s`;
-}
 
 export default function PixelPage({
   onOpenWsPage,
@@ -183,15 +186,21 @@ export default function PixelPage({
 }) {
   const { t } = useTranslation();
   const { data, update } = pixelPageState.use();
+  const isAndroid = /Android/i.test(navigator.userAgent);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cancelledRef = useRef(false);
-  const modeRef = useRef<"file" | "socket">("file");
+  const modeRef = useRef<"file" | "socket" | "ldb">("file");
   const [processing, setProcessing] = useState(false);
   const [done, setDone] = useState(false);
+  const [doneError, setDoneError] = useState(false);
   const [progressText, setProgressText] = useState("");
   const [resultInfo, setResultInfo] = useState<ResultInfo>({});
   const [wsMode, setWsMode] = useState(false);
   const [wsRunning, setWsRunning] = useState(false);
+  const [worldChoices, setWorldChoices] = useState<WorldInfo[]>([]);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerLoading, setPickerLoading] = useState(false);
+  const [pickerError, setPickerError] = useState<string | null>(null);
 
   const isNarrow = useIsNarrow();
   const [activeTab, setActiveTab] = useState<"params" | "palette">("params");
@@ -201,8 +210,7 @@ export default function PixelPage({
       try {
         const s = await invoke<WsStatus>("ws_status");
         setWsRunning(s.running);
-      } catch {
-      }
+      } catch {}
     }, 1000);
     return () => clearInterval(id);
   }, []);
@@ -215,6 +223,43 @@ export default function PixelPage({
   function handleWsClick() {
     modeRef.current = "socket";
     fileInputRef.current?.click();
+  }
+
+  function handleLdbClick() {
+    modeRef.current = "ldb";
+    fileInputRef.current?.click();
+  }
+
+  /// 浏览世界文件夹（直写 LevelDB 用）：桌面用系统目录选择器，安卓用世界发现列表
+  async function handleBrowseWorld() {
+    if (isAndroid) {
+      setPickerLoading(true);
+      setPickerOpen(true);
+      setPickerError(null);
+      try {
+        const worlds = await invoke<WorldInfo[]>("ldb_list_world_dirs");
+        setWorldChoices(worlds);
+      } catch (err) {
+        console.error("ldb_discover_worlds failed:", err);
+        setWorldChoices([]);
+        setPickerError(typeof err === "string" ? err : String(err));
+      } finally {
+        setPickerLoading(false);
+      }
+      return;
+    }
+    try {
+      const path = await open({
+        title: t("pages.pixel.selectWorldTitle"),
+        directory: true,
+      });
+      if (typeof path === "string" && path) {
+        update({ worldPath: path });
+      }
+    } catch (err) {
+      console.error("open world dialog failed:", err);
+      setPickerError(typeof err === "string" ? err : String(err));
+    }
   }
 
   async function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
@@ -232,8 +277,13 @@ export default function PixelPage({
     channel.onmessage = (msg) => {
       console.log("Received progress message:", msg);
       if (msg.finished) {
-        if (!cancelledRef.current) {
+        if (msg.error) {
           setDone(true);
+          setDoneError(true);
+          setProgressText(msg.error);
+        } else if (!cancelledRef.current) {
+          setDone(true);
+          setDoneError(false);
           setResultInfo({ elapsedMs: msg.elapsedMs, outputDir: msg.outputDir });
           setProgressText(t("pages.pixel.taskComplete"));
         }
@@ -282,6 +332,7 @@ export default function PixelPage({
 
     setProcessing(true);
     setDone(false);
+    setDoneError(false);
     setWsMode(modeRef.current === "socket");
     setProgressText("正在准备...");
     try {
@@ -290,6 +341,11 @@ export default function PixelPage({
         params: {
           ...data,
           useSocket: modeRef.current === "socket",
+          useLdb: modeRef.current === "ldb",
+          worldPath: modeRef.current === "ldb" ? data.worldPath : null,
+          originX: modeRef.current === "ldb" ? data.originX : null,
+          originY: modeRef.current === "ldb" ? data.originY : null,
+          originZ: modeRef.current === "ldb" ? data.originZ : null,
           autoSliceMcfunction:
             Storer.load<AppSettings>("settings").autoSliceMcfunction,
           previewImage: Storer.load<AppSettings>("settings").previewImage,
@@ -301,6 +357,8 @@ export default function PixelPage({
       console.log("process_image resolved, 后台线程继续运行");
     } catch (err) {
       console.error("process_image failed:", err);
+      setDone(true);
+      setDoneError(true);
       setProgressText(typeof err === "string" ? err : String(err));
     }
     console.log("Sent image to backend:", file.name);
@@ -862,6 +920,100 @@ export default function PixelPage({
             </div>
           </div>
 
+          {/* 直写 LevelDB 世界 */}
+          <div className="w-full flex items-center justify-between gap-4">
+            <div className="w-full flex items-center justify-between gap-3 min-w-0">
+              <div className="flex flex-col min-w-0">
+                <span className="font-medium">{t("pages.pixel.argLdb")}</span>
+                <span className="text-sm text-md-on-surface-variant">
+                  {t("pages.pixel.argLdbDesc")}
+                </span>
+              </div>
+              <M3eSwitch
+                checked={data.useLdb}
+                onChange={handleSwitchChange("useLdb")}
+                className="shrink-0"
+              />
+            </div>
+          </div>
+          {data.useLdb && (
+            <div className="flex w-full min-w-0 flex-col gap-3">
+              {/* 世界路径 */}
+              <div className="flex w-full min-w-0 items-center justify-between gap-4">
+                <div className="flex flex-col min-w-0 flex-1">
+                  <span className="font-medium">
+                    {t("pages.pixel.argLdbWorldPath")}
+                  </span>
+                  <span className="text-sm text-md-on-surface-variant truncate">
+                    {data.worldPath ||
+                      t("pages.pixel.argLdbWorldPathPlaceholder")}
+                  </span>
+                </div>
+                <M3eButton
+                  variant="tonal"
+                  size="small"
+                  className="shrink-0"
+                  onClick={handleBrowseWorld}
+                >
+                  {t("pages.pixel.argLdbBrowse")}
+                </M3eButton>
+              </div>
+              {/* 生成坐标 */}
+              <div className="flex flex-col gap-2">
+                <span className="font-medium">
+                  {t("pages.pixel.argLdbOrigin")}
+                </span>
+                <div className="flex w-full min-w-0 gap-2">
+                  <M3eFormField
+                    className="flex-1 shrink-0"
+                    hideSubscript="always"
+                  >
+                    <label slot="label" htmlFor="ldb-origin-x">
+                      X
+                    </label>
+                    <input
+                      id="ldb-origin-x"
+                      type="number"
+                      value={data.originX ?? ""}
+                      onChange={handleNumberChange("originX")}
+                      className="w-full bg-transparent outline-none text-left"
+                    />
+                  </M3eFormField>
+                  <M3eFormField
+                    className="flex-1 shrink-0"
+                    hideSubscript="always"
+                  >
+                    <label slot="label" htmlFor="ldb-origin-y">
+                      Y
+                    </label>
+                    <input
+                      id="ldb-origin-y"
+                      type="number"
+                      value={data.originY ?? ""}
+                      onChange={handleNumberChange("originY")}
+                      className="w-full bg-transparent outline-none text-left"
+                    />
+                  </M3eFormField>
+                  <M3eFormField
+                    className="flex-1 shrink-0"
+                    hideSubscript="always"
+                  >
+                    <label slot="label" htmlFor="ldb-origin-z">
+                      Z
+                    </label>
+                    <input
+                      id="ldb-origin-z"
+                      type="number"
+                      value={data.originZ ?? ""}
+                      onChange={handleNumberChange("originZ")}
+                      className="w-full bg-transparent outline-none text-left"
+                    />
+                  </M3eFormField>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* 打包 */}
           <div className="flex items-center justify-between gap-4">
             <div className="flex-col items-start gap-3 min-w-0 w-full">
@@ -964,67 +1116,66 @@ export default function PixelPage({
               {t("pages.pixel.fabGenerateWs")}
             </M3eFabMenuItem>
           </div>
+          <div
+            title={
+              data.useLdb && data.worldPath
+                ? undefined
+                : t("pages.pixel.ldbNeedsWorld")
+            }
+          >
+            <M3eFabMenuItem
+              disabled={!data.useLdb || !data.worldPath}
+              onClick={handleLdbClick}
+            >
+              <M3eIcon slot="icon" name="storage" filled />
+              {t("pages.pixel.fabGenerateLdb")}
+            </M3eFabMenuItem>
+          </div>
         </M3eFabMenu>
       </div>
 
-      {/* 遮罩 */}
-      {processing && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-md-scrim/60">
-          <div className="flex items-center gap-6 rounded-md-xl bg-md-surface-container px-8 py-6 shadow-lg">
-            {done ? (
-              <>
-                <M3eIcon
-                  name="done_all"
-                  filled
-                  className="text-3xl text-md-primary"
-                />
-                <div className="flex max-w-md flex-col gap-1">
-                  <span className="text-md-on-surface">{progressText}</span>
-                  {wsMode ? (
-                    <span className="text-sm text-md-on-surface-variant">
-                      {t("pages.pixel.wsGoPageHint")}
-                    </span>
-                  ) : (
-                    <>
-                      {resultInfo.elapsedMs != null && (
-                        <span className="text-sm text-md-on-surface-variant">
-                          {t("pages.pixel.elapsedLabel")}{" "}
-                          {formatElapsed(resultInfo.elapsedMs)}
-                        </span>
-                      )}
-                      {resultInfo.outputDir && (
-                        <span className="break-all text-sm text-md-on-surface-variant">
-                          {t("pages.pixel.outputLabel")} {resultInfo.outputDir}
-                        </span>
-                      )}
-                    </>
-                  )}
-                </div>
-                {wsMode ? (
-                  <>
-                    <M3eButton variant="filled" onClick={handleWsGoPage}>
-                      {t("pages.pixel.wsGoPage")}
-                    </M3eButton>
-                    <M3eButton variant="tonal" onClick={handleDoneOk}>
-                      {t("pages.pixel.wsNoThanks")}
-                    </M3eButton>
-                  </>
-                ) : (
-                  <M3eButton onClick={handleDoneOk}>OK</M3eButton>
-                )}
-              </>
-            ) : (
-              <>
-                <M3eCircularProgressIndicator variant="wavy" indeterminate />
-                <span className="text-md-on-surface min-w-40">
-                  {progressText}
-                </span>
-                <M3eButton onClick={handleCancel}>取消</M3eButton>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+      <TaskOverlay
+        processing={processing}
+        done={done}
+        error={doneError}
+        progressText={progressText}
+        wsMode={wsMode}
+        resultInfo={resultInfo}
+        wsHint={t("pages.pixel.wsGoPageHint")}
+        wsGoPageLabel={t("pages.pixel.wsGoPage")}
+        wsNoThanksLabel={t("pages.pixel.wsNoThanks")}
+        elapsedLabel={t("pages.pixel.elapsedLabel")}
+        outputLabel={t("pages.pixel.outputLabel")}
+        cancelLabel="取消"
+        onCancel={handleCancel}
+        onDoneOk={handleDoneOk}
+        onWsGoPage={handleWsGoPage}
+      />
+
+      <WorldPicker
+        open={pickerOpen}
+        worlds={worldChoices}
+        loading={pickerLoading}
+        error={pickerError ?? undefined}
+        title={t("pages.pixel.selectWorldTitle")}
+        emptyText={t("pages.pixel.argLdbNoWorld")}
+        hint={t("pages.pixel.argLdbWorldDirHint")}
+        onOpenSettings={
+          isAndroid
+            ? () => {
+                invoke("open_all_files_settings").catch((err) =>
+                  console.error("open settings failed:", err),
+                );
+              }
+            : undefined
+        }
+        settingsLabel={t("pages.pixel.argLdbOpenSettings")}
+        onSelect={(path) => {
+          update({ worldPath: path });
+          setPickerOpen(false);
+        }}
+        onClose={() => setPickerOpen(false)}
+      />
     </div>
   );
 }

@@ -103,6 +103,7 @@ pub fn process_particle(
                 &interpolation,
                 Some(20000), // 无宽高时默认上限 2w 粒子
                 use_socket,
+                false, // 粒子暂不支持直写世界
                 ws_delay,
                 &pipeline,
                 progress,

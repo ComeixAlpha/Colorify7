@@ -130,7 +130,7 @@ const PATCH_SET: &[&[[f32; 2]]] = &[
 /// 中间补丁只允许这 4 种形状
 const MIDDLE_PATCH_SET: [usize; 4] = [0, 4, 8, 15];
 
-/// 每个补丁格边长（3×3 → 144×144）
+/// 每个补丁格边长（3×3 -> 144×144）
 const PATCH_SIZE: u32 = 48;
 const SIZE: u32 = PATCH_SIZE * 3;
 

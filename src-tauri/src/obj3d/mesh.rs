@@ -118,7 +118,7 @@ impl Texture {
         }
     }
 
-    /// 贴图平均色（RGBA → 0-1，忽略 alpha）。无 UV 的三角形回退用
+    /// 贴图平均色（RGBA -> 0-1，忽略 alpha）。无 UV 的三角形回退用
     pub fn average_colour(&self) -> [f32; 4] {
         let mut sum = [0.0f64; 3];
         let mut n = 0.0f64;

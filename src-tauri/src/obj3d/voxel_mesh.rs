@@ -121,7 +121,7 @@ impl VoxelMesh {
     }
 }
 
-/// 坐标 → 哈希键（每轴 21 位，范围 ±2^20，覆盖建筑尺度且无碰撞）
+/// 坐标 -> 哈希键（每轴 21 位，范围 ±2^20，覆盖建筑尺度且无碰撞）
 pub fn key_of(pos: Vec3) -> u64 {
     let (x, y, z) = (pos.x as i64, pos.y as i64, pos.z as i64);
     (((x as u64) & 0x1F_FFFF) << 42) | (((y as u64) & 0x1F_FFFF) << 21) | ((z as u64) & 0x1F_FFFF)

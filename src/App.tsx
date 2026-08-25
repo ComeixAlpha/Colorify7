@@ -1,5 +1,6 @@
 import {
   M3eAppBar,
+  M3eButton,
   M3eDrawerContainer,
   M3eHeading,
   M3eIcon,
@@ -59,12 +60,23 @@ export default function App({ initialSettings }: AppProps = {}) {
 
   // 安卓文件访问权限检测
   const [downloadPermOk, setDownloadPermOk] = useState(true);
+  const [permDialogOpen, setPermDialogOpen] = useState(false);
   useEffect(() => {
-    if (/Android/i.test(navigator.userAgent)) {
-      invoke<boolean>("check_download_permission")
-        .then(setDownloadPermOk)
+    const check = () => {
+      invoke<boolean>("check_all_files_access")
+        .then((ok) => {
+          setDownloadPermOk(ok);
+          setPermDialogOpen(!ok);
+        })
         .catch(() => setDownloadPermOk(true));
-    }
+    };
+    check();
+    // 从系统设置返回/回到前台时重新检测，授权后横幅与弹窗自动消失
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") check();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
   }, []);
 
   useEffect(() => {
@@ -293,6 +305,45 @@ export default function App({ initialSettings }: AppProps = {}) {
             </main>
           </M3eDrawerContainer>
         </div>
+
+        {/* 安卓存储权限引导弹窗 */}
+        {permDialogOpen && (
+          <div
+            className="fixed inset-0 z-[60] grid place-items-center bg-md-scrim/60 p-4"
+            onClick={() => setPermDialogOpen(false)}
+          >
+            <div
+              className="flex w-80 max-w-full flex-col gap-4 rounded-md-xl bg-md-surface-container p-5 shadow-lg"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <span className="text-lg font-medium text-md-on-surface">
+                {t("app.storagePermissionTitle")}
+              </span>
+              <p className="text-sm leading-relaxed text-md-on-surface-variant">
+                {t("app.storagePermissionBody")}
+              </p>
+              <div className="flex justify-end gap-2">
+                <M3eButton
+                  variant="tonal"
+                  onClick={() => setPermDialogOpen(false)}
+                >
+                  {t("app.storagePermissionLater")}
+                </M3eButton>
+                <M3eButton
+                  variant="filled"
+                  onClick={() => {
+                    setPermDialogOpen(false);
+                    invoke("open_all_files_settings").catch((err) =>
+                      console.error("open settings failed:", err),
+                    );
+                  }}
+                >
+                  {t("app.storagePermissionOpen")}
+                </M3eButton>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </M3eTheme>
   );

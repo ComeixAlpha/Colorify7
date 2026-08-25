@@ -34,4 +34,5 @@ tokio-tungstenite = "0.24"
 futures-util = "0.3"
 uuid = { version = "1", features = ["v4"] }
 zip = { version = "2", default-features = false, features = ["deflate"] }
+bedrock-world = { version = "=0.3.5" }
 

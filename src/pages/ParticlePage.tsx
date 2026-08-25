@@ -1,6 +1,4 @@
 import {
-  M3eButton,
-  M3eCircularProgressIndicator,
   M3eFab,
   M3eFabMenu,
   M3eFabMenuItem,
@@ -17,6 +15,7 @@ import { Channel, invoke } from "@tauri-apps/api/core";
 import type { ChangeEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import TaskOverlay from "../components/TaskOverlay";
 import { useIsNarrow } from "../hooks/useIsNarrow";
 import { PageState } from "../session/PageState";
 import ParticleMappings, { loadParticleMappings } from "./ParticleMappings";
@@ -102,6 +101,7 @@ interface ProgressMessage {
   finished: boolean;
   elapsedMs?: number;
   outputDir?: string;
+  error?: string | null;
 }
 
 interface ResultInfo {
@@ -113,16 +113,6 @@ interface WsStatus {
   running: boolean;
   port: number;
   connections: number;
-}
-
-function formatElapsed(ms: number): string {
-  const s = ms / 1000;
-  if (s < 60) {
-    return `${s.toFixed(1)} s`;
-  }
-  const m = Math.floor(s / 60);
-  const rest = Math.round(s % 60);
-  return `${m} min ${rest} s`;
 }
 
 export default function ParticlePage({
@@ -137,6 +127,7 @@ export default function ParticlePage({
   const modeRef = useRef<"file" | "socket">("file");
   const [processing, setProcessing] = useState(false);
   const [done, setDone] = useState(false);
+  const [doneError, setDoneError] = useState(false);
   const [progressText, setProgressText] = useState("");
   const [resultInfo, setResultInfo] = useState<ResultInfo>({});
   const [wsMode, setWsMode] = useState(false);
@@ -182,8 +173,13 @@ export default function ParticlePage({
     channel.onmessage = (msg) => {
       console.log("Received progress message:", msg);
       if (msg.finished) {
-        if (!cancelledRef.current) {
+        if (msg.error) {
           setDone(true);
+          setDoneError(true);
+          setProgressText(msg.error);
+        } else if (!cancelledRef.current) {
+          setDone(true);
+          setDoneError(false);
           setResultInfo({ elapsedMs: msg.elapsedMs, outputDir: msg.outputDir });
           setProgressText(t("pages.particle.taskComplete"));
         }
@@ -197,6 +193,7 @@ export default function ParticlePage({
 
     setProcessing(true);
     setDone(false);
+    setDoneError(false);
     setWsMode(modeRef.current === "socket");
     setProgressText("正在准备...");
     try {
@@ -212,6 +209,8 @@ export default function ParticlePage({
       console.log("process_particle resolved, 后台线程继续运行");
     } catch (err) {
       console.error("process_particle failed:", err);
+      setDone(true);
+      setDoneError(true);
       setProgressText(typeof err === "string" ? err : String(err));
     }
     console.log("Sent image to backend:", file.name);
@@ -680,65 +679,23 @@ export default function ParticlePage({
         </M3eFabMenu>
       </div>
 
-      {/* 遮罩 */}
-      {processing && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-md-scrim/60">
-          <div className="flex items-center gap-6 rounded-md-xl bg-md-surface-container px-8 py-6 shadow-lg">
-            {done ? (
-              <>
-                <M3eIcon
-                  name="done_all"
-                  filled
-                  className="text-3xl text-md-primary"
-                />
-                <div className="flex max-w-md flex-col gap-1">
-                  <span className="text-md-on-surface">{progressText}</span>
-                  {wsMode ? (
-                    <span className="text-sm text-md-on-surface-variant">
-                      {t("pages.particle.wsGoPageHint")}
-                    </span>
-                  ) : (
-                    <>
-                      {resultInfo.elapsedMs != null && (
-                        <span className="text-sm text-md-on-surface-variant">
-                          {t("pages.particle.elapsedLabel")}{" "}
-                          {formatElapsed(resultInfo.elapsedMs)}
-                        </span>
-                      )}
-                      {resultInfo.outputDir && (
-                        <span className="break-all text-sm text-md-on-surface-variant">
-                          {t("pages.particle.outputLabel")}{" "}
-                          {resultInfo.outputDir}
-                        </span>
-                      )}
-                    </>
-                  )}
-                </div>
-                {wsMode ? (
-                  <>
-                    <M3eButton variant="filled" onClick={handleWsGoPage}>
-                      {t("pages.particle.wsGoPage")}
-                    </M3eButton>
-                    <M3eButton variant="tonal" onClick={handleDoneOk}>
-                      {t("pages.particle.wsNoThanks")}
-                    </M3eButton>
-                  </>
-                ) : (
-                  <M3eButton onClick={handleDoneOk}>OK</M3eButton>
-                )}
-              </>
-            ) : (
-              <>
-                <M3eCircularProgressIndicator variant="wavy" indeterminate />
-                <span className="text-md-on-surface min-w-40">
-                  {progressText}
-                </span>
-                <M3eButton onClick={handleCancel}>取消</M3eButton>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+      <TaskOverlay
+        processing={processing}
+        done={done}
+        error={doneError}
+        progressText={progressText}
+        wsMode={wsMode}
+        resultInfo={resultInfo}
+        wsHint={t("pages.particle.wsGoPageHint")}
+        wsGoPageLabel={t("pages.particle.wsGoPage")}
+        wsNoThanksLabel={t("pages.particle.wsNoThanks")}
+        elapsedLabel={t("pages.particle.elapsedLabel")}
+        outputLabel={t("pages.particle.outputLabel")}
+        cancelLabel="取消"
+        onCancel={handleCancel}
+        onDoneOk={handleDoneOk}
+        onWsGoPage={handleWsGoPage}
+      />
     </div>
   );
 }

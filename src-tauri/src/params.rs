@@ -8,4 +8,6 @@ pub struct ProgressMessage {
     pub finished: bool,
     pub elapsed_ms: Option<u64>,
     pub output_dir: Option<String>,
+    /// 失败信息（成功时为空）
+    pub error: Option<String>,
 }

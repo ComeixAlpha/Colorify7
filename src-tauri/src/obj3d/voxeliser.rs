@@ -221,7 +221,7 @@ fn voxelise_bvh_ray(mesh: &Mesh, params: &VoxeliseParams) -> Result<VoxelMesh, S
         })
         .collect();
 
-    // 打射线 → 收集命中（位置, 颜色, 是否朝外）
+    // 打射线 -> 收集命中（位置, 颜色, 是否朝外）
     let hits: Vec<(Vec3, [f32; 4], bool)> = generate_rays(bmin, bmax)
         .par_iter()
         .flat_map_iter(|ray| {
@@ -552,7 +552,7 @@ fn rasterise_tri(
                     1 => Vec3::new(u as f32, 0.0, v as f32),
                     _ => Vec3::new(u as f32, v as f32, 0.0),
                 };
-                // 平面 n·(p-a)=0：p = c0 + t·e_axis → t = n·(a-c0)/nd
+                // 平面 n·(p-a)=0：p = c0 + t·e_axis -> t = n·(a-c0)/nd
                 let t = (n.dot(a) - n.dot(c0)) / nd;
                 let p = match axis {
                     0 => Vec3::new(t, u as f32, v as f32),

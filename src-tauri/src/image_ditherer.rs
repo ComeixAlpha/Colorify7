@@ -545,7 +545,7 @@ fn d_cmc(l1: f32, a1: f32, b1: f32, l2: f32, a2: f32, b2: f32) -> f32 {
     (dl_sl * dl_sl + dc_sc * dc_sc + dh_sh * dh_sh).sqrt()
 }
 
-/// sRGB (0-255) → CIE Lab（D65 白点）
+/// sRGB (0-255) -> CIE Lab（D65 白点）
 #[inline(always)]
 pub(crate) fn srgb_to_lab(r: f32, g: f32, b: f32) -> (f32, f32, f32) {
     let linear = |c: f32| {
@@ -558,7 +558,7 @@ pub(crate) fn srgb_to_lab(r: f32, g: f32, b: f32) -> (f32, f32, f32) {
     };
     let (rl, gl, bl) = (linear(r), linear(g), linear(b));
 
-    // sRGB → XYZ (D65)
+    // sRGB -> XYZ (D65)
     let x = rl * 0.4124564 + gl * 0.3575761 + bl * 0.1804375;
     let y = rl * 0.2126729 + gl * 0.7151522 + bl * 0.0721750;
     let z = rl * 0.0193339 + gl * 0.1191920 + bl * 0.9503041;

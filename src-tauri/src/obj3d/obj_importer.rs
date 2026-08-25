@@ -188,7 +188,7 @@ impl Parser {
         Ok(())
     }
 
-    /// 收尾：加载 MTL 合并材质 → 居中 / 旋转；预览模式可截断三角形
+    /// 收尾：加载 MTL 合并材质 -> 居中 / 旋转；预览模式可截断三角形
     fn finish(mut self, options: &ImportOptions) -> Result<Mesh, String> {
         if self.vertices.is_empty() {
             return Err("未解析到任何顶点".into());

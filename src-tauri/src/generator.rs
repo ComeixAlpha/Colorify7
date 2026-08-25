@@ -22,12 +22,16 @@ pub struct GenParams {
     pub auto_slice_mcfunction: bool,
     pub use_dithering: bool,
     pub socket_output: bool,
+    /// 直写 LevelDB 世界：收集方块列表 (x, y, z, id)，不写文件/命令
+    pub ldb_output: bool,
 }
 
 pub struct GenOutput {
     /// 实际匹配的 RGBA 预览缓冲
     pub preview: Vec<u8>,
     pub commands: Option<Vec<String>>,
+    /// 直写世界模式收集的方块（世界相对坐标，已含平面切换与偏移）
+    pub blocks_ldb: Option<Vec<(i32, i32, i32, String)>>,
     /// 包围盒尺寸 [x, z, y]
     pub size: [i32; 3],
     pub function_files: usize,
@@ -70,7 +74,8 @@ pub fn generate<'a>(
 
     let mut commands: Vec<String> = Vec::new();
     let mut blocks: Vec<PlacedBlock> = Vec::new();
-    let mut writer = if params.use_struct || params.socket_output {
+    let mut blocks_ldb: Vec<(i32, i32, i32, String)> = Vec::new();
+    let mut writer = if params.use_struct || params.socket_output || params.ldb_output {
         None
     } else {
         Some(FunctionWriter::new(
@@ -92,6 +97,10 @@ pub fn generate<'a>(
         emitted += 1;
         if params.socket_output {
             commands.push(socket_command(params, x, y, z, id));
+            Ok(())
+        } else if params.ldb_output {
+            let (cx, cy, cz) = command_coords(params, x, y, z);
+            blocks_ldb.push((cx, cy, cz, id.to_string()));
             Ok(())
         } else {
             match writer.as_mut() {
@@ -268,27 +277,37 @@ pub fn generate<'a>(
         } else {
             None
         },
+        blocks_ldb: if params.ldb_output {
+            Some(blocks_ldb)
+        } else {
+            None
+        },
         size,
         function_files,
     })
 }
 
-/// WebSocket 命令
+/// 平面切换 + 偏移后的世界相对坐标（socket / ldb 共用）
 #[inline(always)]
-fn socket_command(params: &GenParams, x: i32, y: i32, z: i32, id: &str) -> String {
+fn command_coords(params: &GenParams, x: i32, y: i32, z: i32) -> (i32, i32, i32) {
     let (cx, cy, cz) = if params.use_staircase {
         (x, y, z)
     } else {
         let s = common::switch_xyz(params.plane, [x, y, z]);
         (s[0], s[1], s[2])
     };
-    format!(
-        "setblock ~{} ~{} ~{} {}",
+    (
         cx + params.offset[0],
         cy + params.offset[1],
         cz + params.offset[2],
-        id
     )
+}
+
+/// WebSocket 命令
+#[inline(always)]
+fn socket_command(params: &GenParams, x: i32, y: i32, z: i32, id: &str) -> String {
+    let (cx, cy, cz) = command_coords(params, x, y, z);
+    format!("setblock ~{} ~{} ~{} {}", cx, cy, cz, id)
 }
 
 #[inline(always)]
@@ -518,7 +537,7 @@ pub fn export_blocks_3d(
     }
     let dir = out_dir.expect("文件模式必须提供输出目录");
 
-    // 结构：包围盒 → McStructure
+    // 结构：包围盒 -> McStructure
     if use_struct {
         let mut lx = i32::MAX;
         let mut ly = i32::MAX;

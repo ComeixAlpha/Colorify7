@@ -51,6 +51,13 @@ pub struct PixelParams {
     pub pk_name: Option<String>,
     pub pk_auth: Option<String>,
     pub pk_desc: Option<String>,
+
+    #[serde(default)]
+    pub use_ldb: bool,
+    pub world_path: Option<String>,
+    pub origin_x: Option<i32>,
+    pub origin_y: Option<i32>,
+    pub origin_z: Option<i32>,
 }
 
 #[derive(Default)]
@@ -165,6 +172,7 @@ impl ArtGenerator for PixelPipeline {
             auto_slice_mcfunction: params.auto_slice_mcfunction,
             use_dithering: params.use_dithering,
             socket_output: params.use_socket,
+            ldb_output: params.use_ldb,
         };
         let output = generator::generate(
             img,
@@ -175,6 +183,19 @@ impl ArtGenerator for PixelPipeline {
             progress.cancel(),
             &mut |s: &str| progress.stage(s),
         )?;
+
+        // 直写 LevelDB 世界
+        if params.use_ldb {
+            let blocks = output.blocks_ldb.ok_or("ldb 模式缺少方块")?;
+            let world_path = params.world_path.as_deref().ok_or("未选择世界路径")?;
+            let origin = [
+                params.origin_x.unwrap_or(0),
+                params.origin_y.unwrap_or(0),
+                params.origin_z.unwrap_or(0),
+            ];
+            crate::ldb::write_blocks_to_world(world_path, 0, origin, &blocks, progress)?;
+            return Ok(None);
+        }
 
         // socket
         if params.use_socket {
@@ -234,6 +255,7 @@ pub fn process_image(
     let resize_y = params.resize_y;
     let interpolation = params.resize_interpolation.clone();
     let use_socket = params.use_socket;
+    let use_ldb = params.use_ldb;
     let ws_delay = params.ws_command_delay.max(1) as u64;
 
     spawn_art_task(
@@ -253,6 +275,7 @@ pub fn process_image(
                 &interpolation,
                 None,
                 use_socket,
+                use_ldb,
                 ws_delay,
                 &pipeline,
                 progress,

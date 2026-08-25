@@ -5,6 +5,7 @@ mod common;
 mod generator;
 mod image_ditherer;
 mod image_processor;
+mod ldb;
 mod nbt;
 mod obj3d;
 mod pack;
@@ -16,6 +17,9 @@ mod process3d;
 #[cfg(desktop)]
 mod window_state;
 mod ws;
+
+/// 安卓 "所有文件访问" 设置跳转插件句柄（经 tauri 移动插件机制调用 Kotlin 侧）
+pub struct SettingsPluginHandle(pub tauri::plugin::PluginHandle<tauri::Wry>);
 
 #[cfg(desktop)]
 use tauri::Manager;
@@ -41,6 +45,26 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_store::Builder::default().build())
+        .plugin(
+            tauri::plugin::Builder::<tauri::Wry, ()>::new("colorify-settings")
+                .setup(|app, api| {
+                    #[cfg(target_os = "android")]
+                    {
+                        use tauri::Manager;
+                        let handle = api.register_android_plugin(
+                            "com.comeixalpha.colorify.settings",
+                            "SettingsPlugin",
+                        )?;
+                        app.manage(SettingsPluginHandle(handle));
+                    }
+                    #[cfg(not(target_os = "android"))]
+                    {
+                        let _ = (app, api);
+                    }
+                    Ok(())
+                })
+                .build(),
+        )
         .manage(pixel::PixelProcessState::default())
         .manage(process3d::Process3dState::default())
         .manage(particle::ParticleProcessState::default())
@@ -100,7 +124,12 @@ pub fn run() {
             ws::ws_task_pause,
             ws::ws_task_resume,
             ws::ws_task_stop,
-            ws::ws_task_status
+            ws::ws_task_status,
+            ldb::ldb_discover_worlds,
+            ldb::ldb_read_block,
+            ldb::ldb_list_world_dirs,
+            ldb::open_all_files_settings,
+            ldb::check_all_files_access
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
