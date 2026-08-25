@@ -23,6 +23,7 @@ const FEATURES: AboutItem[] = [
   { key: "featurePixel", icon: "grid_view" },
   { key: "featureVoxel", icon: "view_in_ar" },
   { key: "featureWebSocket", icon: "cable" },
+  { key: "featureLdb", icon: "database" },
 ];
 
 const AVATAR_URLS = import.meta.glob<string>(

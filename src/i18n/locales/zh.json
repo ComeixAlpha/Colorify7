@@ -311,7 +311,7 @@
       "a18": "请前往「关于」页面获取作者联系方式（邮箱 / QQ），或到 GitHub 仓库提交 Issue。反馈时请附上生成参数、所用图片/模型与日志，方便快速定位问题。"
     },
     "about": {
-      "description": "Colorify 7 是一款桌面工具，可将图片转换为《我的世界》粒子画与像素画，也能把 OBJ / GLB / GLTF 三维模型体素化为游戏内建筑。生成结果既可以导出为 mcfunction / mcstructure 文件，也可以通过 WebSocket 实时传输到游戏内。",
+      "description": "Colorify 7 是一款桌面工具，可将图片转换为《我的世界》粒子画与像素画，也能把 OBJ / GLB / GLTF 三维模型体素化为游戏内建筑。生成结果既可以导出为 mcfunction / mcstructure 文件，也可以通过 WebSocket 实时传输到游戏内，或直接写入 Minecraft 世界存档（LevelDB）。",
       "author": "作者",
       "authorName": "ComeixAlpha",
       "emailLabel": "邮箱",
@@ -326,6 +326,8 @@
       "featureVoxelDesc": "将 OBJ / GLB / GLTF 模型体素化为实心或空心建筑",
       "featureWebSocket": "WebSocket",
       "featureWebSocketDesc": "将方块命令实时传输到游戏内，边生成边搭建",
+      "featureLdb": "LevelDB 直写",
+      "featureLdbDesc": "将生成的方块直接写入 Minecraft 世界存档，保留原地形（需先关闭游戏）",
       "links": "相关链接",
       "legacyDoc": "旧版文档",
       "legacyDocDesc": "Colorify 6 GitHub Pages 文档",

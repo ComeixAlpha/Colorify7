@@ -2,7 +2,7 @@
 
 [English](README.md) | **简体中文**
 
-Colorify 7 是一个面向 Minecraft: Bedrock Edition 的开源工具，可将图像与三维模型转换为游戏内内容。它支持粒子艺术、像素艺术与物体体素化，结果可导出为 `mcfunction`、`mcstructure` 或 `mcaddon` 文件，也可通过本地 WebSocket 服务器直接实时传输到正在运行的游戏会话中。
+Colorify 7 是一个面向 Minecraft: Bedrock Edition 的开源工具，可将图像与三维模型转换为游戏内内容。它支持粒子艺术、像素艺术与物体体素化，结果可导出为 `mcfunction`、`mcstructure` 或 `mcaddon` 文件，也可通过本地 WebSocket 服务器直接实时传输到正在运行的游戏会话中，或直接写入 Minecraft 世界存档（LevelDB）。
 
 本应用基于 [Tauri 2](https://tauri.app/) 与 [React](https://react.dev/) 构建，支持 Windows 与 Android 平台。
 
@@ -32,6 +32,10 @@ Colorify 7 是一个面向 Minecraft: Bedrock Edition 的开源工具，可将�
 ### WebSocket 实时传输
 
 运行一个本地 WebSocket 服务器，将生成的方块指令实时推送到已连接的基岩版客户端，可在建造过程中即时观察结果。服务器会报告任务进度，并将游戏消息转发回应用。
+
+### LevelDB 直写
+
+将生成的方块直接写入基岩版世界存档的 `db/` LevelDB 目录，完全绕过文件导入或 WebSocket。原地形会保留，仅覆盖目标坐标。支持 Windows（任意世界文件夹）与 Android（世界文件夹放在 `Download/colorify` 下，需「所有文件访问」权限）。
 
 ## 平台支持
 

@@ -311,7 +311,7 @@
       "a18": "Find the author's contact info (email / QQ) on the About page, or open an Issue on the GitHub repository. When reporting, please include the generation parameters, the image/model used and the logs so we can locate the problem faster."
     },
     "about": {
-      "description": "Colorify 7 is a desktop tool that turns images into Minecraft particle art and pixel art, and voxelises OBJ / GLB / GLTF 3D models into in-game builds. Results can be exported as mcfunction / mcstructure files, or streamed straight into your game via WebSocket.",
+      "description": "Colorify 7 is a desktop tool that turns images into Minecraft particle art and pixel art, and voxelises OBJ / GLB / GLTF 3D models into in-game builds. Results can be exported as mcfunction / mcstructure files, streamed straight into your game via WebSocket, or written directly into a Minecraft world save (LevelDB).",
       "author": "Author",
       "authorName": "ComeixAlpha",
       "emailLabel": "Email",
@@ -326,6 +326,8 @@
       "featureVoxelDesc": "Voxelise OBJ / GLB / GLTF models into solid or hollow Minecraft builds",
       "featureWebSocket": "WebSocket",
       "featureWebSocketDesc": "Stream block commands into your game in real time and watch the build happen",
+      "featureLdb": "Direct LevelDB Write",
+      "featureLdbDesc": "Write generated blocks straight into a Minecraft world save while preserving the existing terrain (close the game first)",
       "links": "Links",
       "legacyDoc": "Legacy Documentation",
       "legacyDocDesc": "Colorify 6 documentation on GitHub Pages",

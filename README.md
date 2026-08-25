@@ -2,7 +2,7 @@
 
 **English** | [简体中文](README.zh-CN.md)
 
-Colorify 7 is an open-source tool for Minecraft: Bedrock Edition that converts images and three-dimensional models into in-game content. It supports particle art, pixel art, and object voxelisation, and can export the results as `mcfunction`, `mcstructure`, or `mcaddon` files, or stream them directly into a running game session through a local WebSocket server.
+Colorify 7 is an open-source tool for Minecraft: Bedrock Edition that converts images and three-dimensional models into in-game content. It supports particle art, pixel art, and object voxelisation, and can export the results as `mcfunction`, `mcstructure`, or `mcaddon` files, stream them directly into a running game session through a local WebSocket server, or write them straight into a world save (LevelDB) on disk.
 
 The application is built with [Tauri 2](https://tauri.app/) and [React](https://react.dev/), and is available on Windows and Android.
 
@@ -15,6 +15,7 @@ The application is built with [Tauri 2](https://tauri.app/) and [React](https://
     - [Pixel Art](#pixel-art)
     - [Obj to Voxel](#obj-to-voxel)
     - [WebSocket Streaming](#websocket-streaming)
+    - [Direct LevelDB Write](#direct-leveldb-write)
   - [Platform Support](#platform-support)
   - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
@@ -42,6 +43,10 @@ Voxelises `OBJ`, `GLB`, and `GLTF` models into solid or hollow Minecraft builds.
 ### WebSocket Streaming
 
 Runs a local WebSocket server that pushes generated block commands to a connected Bedrock client in real time, allowing the build to be observed as it is placed. The server reports task progress and forwards game messages back into the application.
+
+### Direct LevelDB Write
+
+Writes generated blocks straight into a Bedrock world save's `db/` LevelDB directory, bypassing file import or WebSocket entirely. Existing terrain is preserved — only the target coordinates are overwritten. Works on Windows (any world folder) and Android (world folders placed under `Download/colorify`; requires the "All files access" permission).
 
 ## Platform Support
 
