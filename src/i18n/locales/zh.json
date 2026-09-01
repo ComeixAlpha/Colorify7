@@ -122,6 +122,9 @@
       "argStaircaseGap": "阶梯式竖向间隔",
       "argStaircaseGapDesc": "阶梯每一级之间的间距 (BE: 2, JE: 1)",
 
+      "argStaircaseCompress": "阶梯式无损压缩",
+      "argStaircaseCompressDesc": "在不改变地图显示效果的前提下，把阶梯高度压缩到理论极限",
+
       "argWebSocketCommandDelay": "WebSocket 命令延迟",
       "argWebSocketCommandDelayDesc": "发送到 WebSocket 服务器的每条命令之间的延迟 (ms)",
 

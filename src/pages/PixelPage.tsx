@@ -133,6 +133,7 @@ export interface PixelParams {
   offsetY: number | null;
   offsetZ: number | null;
   staircaseGap: number;
+  staircaseCompress: boolean;
   wsCommandDelay: number;
   pkName: string;
   pkAuth: string;
@@ -164,6 +165,7 @@ export class PixelPageState extends PageState<PixelParams> {
       offsetY: null,
       offsetZ: null,
       staircaseGap: 2,
+      staircaseCompress: true,
       wsCommandDelay: 10,
       pkName: "",
       pkAuth: "",
@@ -643,6 +645,26 @@ export default function PixelPage({
               <M3eSwitch
                 checked={data.useStaircase}
                 onChange={handleSwitchChange("useStaircase")}
+                className="shrink-0"
+              />
+            </div>
+          </div>
+
+          {/* 阶梯式无损压缩 */}
+          <div className="w-full flex items-center justify-between gap-4">
+            <div className="w-full flex items-center justify-between gap-3 min-w-0">
+              <div className="flex flex-col min-w-0">
+                <span className="font-medium">
+                  {t("pages.pixel.argStaircaseCompress")}
+                </span>
+                <span className="text-sm text-md-on-surface-variant">
+                  {t("pages.pixel.argStaircaseCompressDesc")}
+                </span>
+              </div>
+
+              <M3eSwitch
+                checked={data.staircaseCompress}
+                onChange={handleSwitchChange("staircaseCompress")}
                 className="shrink-0"
               />
             </div>

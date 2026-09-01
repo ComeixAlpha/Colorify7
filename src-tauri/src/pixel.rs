@@ -17,6 +17,10 @@ use crate::params::ProgressMessage;
 use crate::process::{run_art_pipeline, spawn_art_task, ArtGenerator, ProgressSink};
 use crate::ws;
 
+fn default_true() -> bool {
+    true
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[allow(dead_code)]
@@ -41,6 +45,8 @@ pub struct PixelParams {
     pub offset_y: Option<i32>,
     pub offset_z: Option<i32>,
     pub staircase_gap: i32,
+    #[serde(default = "default_true")]
+    pub staircase_compress: bool,
     pub ws_command_delay: i32,
 
     #[serde(default)]
@@ -164,6 +170,7 @@ impl ArtGenerator for PixelPipeline {
                 params.use_struct
             },
             staircase_gap: params.staircase_gap.max(1),
+            staircase_compress: params.staircase_compress,
             offset: [
                 params.offset_x.unwrap_or(0),
                 params.offset_y.unwrap_or(0),

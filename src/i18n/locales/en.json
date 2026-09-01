@@ -122,6 +122,9 @@
       "argStaircaseGap": "Staircase Gap",
       "argStaircaseGapDesc": "The gap between each step of the staircase",
 
+      "argStaircaseCompress": "Lossless Compression",
+      "argStaircaseCompressDesc": "Compress the staircase height to the theoretical minimum without changing the map display",
+
       "argWebSocketCommandDelay": "WebSocket Command Delay",
       "argWebSocketCommandDelayDesc": "The delay between each command sent (ms)",
 

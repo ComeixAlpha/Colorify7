@@ -18,6 +18,8 @@ pub struct GenParams {
     pub use_staircase: bool,
     pub use_struct: bool,
     pub staircase_gap: i32,
+    /// 阶梯式无损压缩：每级高度压到 min(gap, 2)，每段独立下沉使最低方块贴基准 0
+    pub staircase_compress: bool,
     pub offset: [i32; 3],
     pub auto_slice_mcfunction: bool,
     pub use_dithering: bool,
@@ -150,6 +152,9 @@ pub fn generate<'a>(
             None
         };
 
+        // 启用压缩时自动调整 Step
+        let step = staircase_step(params.staircase_gap, params.staircase_compress);
+
         // 并行偏移传播
         let mut cells = vec![
             StairCell {
@@ -183,9 +188,9 @@ pub fn generate<'a>(
                     let idx = (idx3 / 3) as usize;
                     let shade = (idx3 % 3) as u8;
                     let offset_now = match shade {
-                        0 => -params.staircase_gap,
+                        0 => -step,
                         1 => 0,
-                        _ => params.staircase_gap,
+                        _ => step,
                     };
                     let y = basey + offset;
                     col[z] = StairCell {
@@ -195,6 +200,11 @@ pub fn generate<'a>(
                     };
                     basey = y;
                     offset = offset_now;
+                }
+
+                // 压缩
+                if params.staircase_compress {
+                    compress_staircase_column(col, step);
                 }
                 Ok(())
             },
@@ -607,4 +617,68 @@ pub fn export_blocks_3d(
         .flush()
         .map_err(|e| format!("写入 mcfunction 失败: {e}"))?;
     Ok(None)
+}
+
+fn staircase_step(gap: i32, compress: bool) -> i32 {
+    if compress {
+        gap.min(2)
+    } else {
+        gap
+    }
+}
+
+/// 阶梯式无损压缩
+fn compress_staircase_column(col: &mut [StairCell], step: i32) {
+    let height = col.len();
+    let mut i = 0;
+    while i < height {
+        // 跳过透明，定位一段连续实心区
+        while i < height && col[i].y == i32::MIN {
+            i += 1;
+        }
+        if i >= height {
+            break;
+        }
+        let start = i;
+        let mut end = i;
+        while end < height && col[end].y != i32::MIN {
+            end += 1;
+        }
+        let n = end - start;
+
+        // 约束 k（k=0..n-2）连接 start+k 与 start+k+1，由南侧方块的阴影决定
+        // （传播语义：y_z - y_{z+1} = offset(shade_{z+1})）
+        let mut low = vec![0i32; n];
+        // 正向：南侧下界 = max(0, 北侧下界 + L)
+        for k in 0..n - 1 {
+            let l = match col[start + k + 1].shade {
+                0 => step,
+                1 => 0,
+                _ => i32::MIN,
+            };
+            low[k + 1] = if l == i32::MIN {
+                0
+            } else {
+                (low[k] + l).max(0)
+            };
+        }
+        // 反向：北侧下界 = max(北侧下界, 南侧下界 - U)
+        for k in (0..n - 1).rev() {
+            let u = match col[start + k + 1].shade {
+                0 => i32::MAX,
+                1 => 0,
+                _ => -step,
+            };
+            if u != i32::MAX {
+                let v = low[k + 1] - u;
+                if v > low[k] {
+                    low[k] = v;
+                }
+            }
+        }
+        for k in 0..n {
+            col[start + k].y = low[k];
+        }
+        i = end;
+    }
 }
