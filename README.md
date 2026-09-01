@@ -14,10 +14,10 @@ The application is built with [Tauri 2](https://tauri.app/) and [React](https://
     </tr>
     <tr>
         <td>
-        <img src="./gallery/staircase_example.png" alt="示例图片" style="height:400px; width:auto;">
+        <img src="./gallery/staircase_example.png" alt="示例图片" style="height:300px; width:auto;">
         </td>
         <td>
-        <img src="./gallery/staircase_example_pixel.png" alt="示例图片" style="height:400px; width:auto;">
+        <img src="./gallery/staircase_example_pixel.png" alt="示例图片" style="height:300px; width:auto;">
         </td>
     </tr>
 </table>

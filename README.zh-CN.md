@@ -14,10 +14,10 @@ Colorify 7 是一个面向 Minecraft: Bedrock Edition 的开源工具，可将�
     </tr>
     <tr>
         <td>
-        <img src="./gallery/staircase_example.png" alt="示例图片" style="height:400px; width:auto;">
+        <img src="./gallery/staircase_example.png" alt="示例图片" style="height:300px; width:auto;">
         </td>
         <td>
-        <img src="./gallery/staircase_example_pixel.png" alt="示例图片" style="height:400px; width:auto;">
+        <img src="./gallery/staircase_example_pixel.png" alt="示例图片" style="height:300px; width:auto;">
         </td>
     </tr>
 </table>
