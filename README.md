@@ -1,14 +1,35 @@
 # Colorify 7
 
+![](https://img.shields.io/badge/github-ComeixAlpha/Colorify7-blue?logo=github) ![](https://img.shields.io/badge/Dedicated-MCBE-green) ![](https://img.shields.io/badge/LICENSE-NoCommercial-red)
+
 **English** | [简体中文](README.zh-CN.md)
 
 Colorify 7 is an open-source tool for Minecraft: Bedrock Edition that converts images and three-dimensional models into in-game content. It supports particle art, pixel art, and object voxelisation, and can export the results as `mcfunction`, `mcstructure`, or `mcaddon` files, stream them directly into a running game session through a local WebSocket server, or write them straight into a world save (LevelDB) on disk.
 
 The application is built with [Tauri 2](https://tauri.app/) and [React](https://react.dev/), and is available on Windows and Android.
 
+<table>
+    <tr>
+        <td colspan=2><a href="https://skfb.ly/pK9UV">Pixel Art Example (256x Lanczos3 CIEDE2000): "4am." by Novelance</a></td>
+    </tr>
+    <tr>
+        <td>
+        <img src="./gallery/staircase_example.png" alt="示例图片" style="height:400px; width:auto;">
+        </td>
+        <td>
+        <img src="./gallery/staircase_example_pixel.png" alt="示例图片" style="height:400px; width:auto;">
+        </td>
+    </tr>
+</table>
+
+## Document
+
+You can find the reference documentation at [Colorify Docs](https://comeixalpha.github.io/docs), which contains detailed installation, usage instructions and explanations of various parameters.
+
 ## Table of Contents
 
 - [Colorify 7](#colorify-7)
+  - [Document](#document)
   - [Table of Contents](#table-of-contents)
   - [Features](#features)
     - [Particle Art](#particle-art)
@@ -22,7 +43,7 @@ The application is built with [Tauri 2](https://tauri.app/) and [React](https://
     - [Run from Source](#run-from-source)
     - [Build a Release](#build-a-release)
   - [Usage](#usage)
-  - [Gallery](#gallery)
+  - [Voxel Gallery](#voxel-gallery)
   - [Acknowledgements](#acknowledgements)
   - [License](#license)
 
@@ -91,7 +112,7 @@ To stream into the game:
 - On Windows, enable the UWP loopback exemption first so that the game can reach a local server.
 - Connect with `/connect 127.0.0.1:<port>`.
 
-## Gallery
+## Voxel Gallery
 
 <table>
     <tr>

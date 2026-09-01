@@ -1,10 +1,30 @@
 # Colorify 7
 
+![](https://img.shields.io/badge/github-ComeixAlpha/Colorify7-blue?logo=github) ![](https://img.shields.io/badge/Dedicated-MCBE-green) ![](https://img.shields.io/badge/LICENSE-NoCommercial-red)
+
 [English](README.md) | **简体中文**
 
 Colorify 7 是一个面向 Minecraft: Bedrock Edition 的开源工具，可将图像与三维模型转换为游戏内内容。它支持粒子艺术、像素艺术与物体体素化，结果可导出为 `mcfunction`、`mcstructure` 或 `mcaddon` 文件，也可通过本地 WebSocket 服务器直接实时传输到正在运行的游戏会话中，或直接写入 Minecraft 世界存档（LevelDB）。
 
 本应用基于 [Tauri 2](https://tauri.app/) 与 [React](https://react.dev/) 构建，支持 Windows 与 Android 平台。
+
+<table>
+    <tr>
+        <td colspan=2><a href="https://skfb.ly/pK9UV">像素画生成示例（256x Lanczos3 CIEDE2000）: "4am." by Novelance</a></td>
+    </tr>
+    <tr>
+        <td>
+        <img src="./gallery/staircase_example.png" alt="示例图片" style="height:400px; width:auto;">
+        </td>
+        <td>
+        <img src="./gallery/staircase_example_pixel.png" alt="示例图片" style="height:400px; width:auto;">
+        </td>
+    </tr>
+</table>
+
+## 文档
+
+您可以在 [Colorify Docs](https://comeixalpha.github.io/docs) 找到参考文档，内有详细的安装、使用教程与各项参数解释。
 
 ## 目录
 
@@ -80,7 +100,7 @@ pnpm tauri build  # 生成平台安装包
 - 在 Windows 上，需先启用 UWP 回环豁免，游戏才能访问本地服务器。
 - 使用 `/connect 127.0.0.1:<port>` 连接。
 
-## 画廊
+## 体素艺术画廊
 
 <table>
     <tr>
