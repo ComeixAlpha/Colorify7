@@ -276,6 +276,15 @@ fn air_state() -> BlockState {
     }
 }
 
+/// 规范化方块 id：世界存档要求带 minecraft: 前缀，调色板给的是短名
+fn normalize_block_id(name: &str) -> String {
+    if name.contains(':') {
+        name.to_string()
+    } else {
+        format!("minecraft:{name}")
+    }
+}
+
 /// 写方块到世界
 pub(crate) fn write_blocks_to_world(
     world_path: &str,
@@ -328,89 +337,131 @@ pub(crate) fn write_blocks_to_world(
     // 世界维度
     let dim = Dimension::from_id(dimension);
 
-    // 逐 subchunk 合并写入
+    // 按区块分组：chunk -> 子区块层 -> 该层要放的方块
     progress.stage("写入世界");
-    let mut groups: std::collections::BTreeMap<(i32, i32, i8), Vec<(u8, u8, u8, String)>> =
+    let mut chunks: std::collections::BTreeMap<(i32, i32), BTreeMap<i8, Vec<(u8, u8, u8, String)>>> =
         std::collections::BTreeMap::new();
     for (bx, by, bz, id) in blocks {
         let (wx, wy, wz) = (origin[0] + bx, origin[1] + by, origin[2] + bz);
         let (cx, cz) = (wx.div_euclid(16), wz.div_euclid(16));
         let sy = i8::try_from(wy.div_euclid(16)).map_err(|_| format!("Y 越界: {wy}"))?;
-        groups.entry((cx, cz, sy)).or_default().push((
-            (wx.rem_euclid(16)) as u8,
-            (wy.rem_euclid(16)) as u8,
-            (wz.rem_euclid(16)) as u8,
-            id.clone(),
-        ));
+        chunks
+            .entry((cx, cz))
+            .or_default()
+            .entry(sy)
+            .or_default()
+            .push((
+                (wx.rem_euclid(16)) as u8,
+                (wy.rem_euclid(16)) as u8,
+                (wz.rem_euclid(16)) as u8,
+                id.clone(),
+            ));
     }
-    let total = groups.len();
-    let mut affected: std::collections::BTreeSet<ChunkPos> = std::collections::BTreeSet::new();
-    let mut done = 0usize;
-    for ((cx, cz, sy), placements) in groups {
+
+    // 每个区块的已触达层切成连续段，每段一次写回；段内每层都含方块，不会连带重写未触达的子区块
+    let mut runs: Vec<(ChunkPos, Vec<i8>)> = Vec::new();
+    for (&(cx, cz), levels) in &chunks {
         let chunk = ChunkPos {
             x: cx,
             z: cz,
             dimension: dim,
         };
+        let mut current: Vec<i8> = Vec::new();
+        for &sy in levels.keys() {
+            if current
+                .last()
+                .is_some_and(|&prev| prev.checked_add(1) != Some(sy))
+            {
+                runs.push((chunk, std::mem::take(&mut current)));
+            }
+            current.push(sy);
+        }
+        if !current.is_empty() {
+            runs.push((chunk, current));
+        }
+    }
+
+    let total = runs.len();
+    let mut affected: std::collections::BTreeSet<ChunkPos> = std::collections::BTreeSet::new();
+    let mut done = 0usize;
+    let mut last_report = std::time::Instant::now();
+    for (chunk, levels) in runs {
+        if progress.cancelled() {
+            return Err("已取消".into());
+        }
         affected.insert(chunk);
 
-        let mut states: Vec<BlockState> = vec![air_state(); 4096];
-        let sub = world
-            .get_subchunk_layer_blocking(chunk, i32::from(sy) * 16, SubChunkDecodeMode::FullIndices)
-            .map_err(|e| format!("读取子区块失败: {e}"))?;
-        if let Some(sub) = sub {
-            match &sub.format {
-                SubChunkFormat::Paletted { storages, .. } => {
-                    if let Some(s) = storages.first() {
-                        if let Some(indices) = &s.indices {
-                            for i in 0..4096 {
-                                states[i] = s.states[indices[i] as usize].clone();
-                            }
-                        }
-                    }
-                }
-                _ => {
-                    return Err(format!(
-                        "区块 ({cx},{cz}) 子区块 {sy} 无法解码，已中止以避免损坏"
-                    ))
-                }
-            }
-        }
-
-        // 覆盖冲突
-        for (lx, ly, lz, id) in placements {
-            let si = block_storage_index(lx, ly, lz);
-            states[si] = BlockState {
-                name: id,
-                states: BTreeMap::new(),
-                version: Some(18_002_711),
-            };
-        }
-
-        // 构造 16^3 结构
-        let size = McStructureSize::new(16, 16, 16).map_err(|e| format!("结构尺寸错误: {e}"))?;
-        let mut structure = McStructureFile::new_air(size, [cx * 16, i32::from(sy) * 16, cz * 16])
-            .map_err(|e| format!("创建结构失败: {e}"))?;
+        let min_sy = levels[0];
+        let size = McStructureSize::new(16, 16 * levels.len() as i32, 16)
+            .map_err(|e| format!("结构尺寸错误: {e}"))?;
+        let mut structure =
+            McStructureFile::new_air(size, [chunk.x * 16, i32::from(min_sy) * 16, chunk.z * 16])
+                .map_err(|e| format!("创建结构失败: {e}"))?;
         structure.palette.clear();
         structure.palette.push(McStructurePaletteEntry::air()); // 0 = air
         let mut pmap: std::collections::HashMap<String, usize> = std::collections::HashMap::new();
-        for i in 0..4096 {
-            let (x, z, y) = (i / 256, (i / 16) % 16, i % 16);
-            let st = &states[i];
-            let key = format!("{}|{:?}|{:?}", st.name, st.states, st.version);
-            let idx = if let Some(&j) = pmap.get(&key) {
-                j
-            } else {
-                let j = structure.palette.len();
-                structure.palette.push(McStructurePaletteEntry {
-                    name: st.name.clone(),
-                    states: st.states.clone(),
-                    version: st.version,
-                });
-                pmap.insert(key, j);
-                j
-            };
-            structure.primary_indices[x * 256 + y * 16 + z] = idx as i32;
+
+        // 逐层读取原地形并合并，同时填入结构
+        for (layer, &sy) in levels.iter().enumerate() {
+            let mut states: Vec<BlockState> = vec![air_state(); 4096];
+            let sub = world
+                .get_subchunk_layer_blocking(
+                    chunk,
+                    i32::from(sy) * 16,
+                    SubChunkDecodeMode::FullIndices,
+                )
+                .map_err(|e| format!("读取子区块失败: {e}"))?;
+            if let Some(sub) = sub {
+                match &sub.format {
+                    SubChunkFormat::Paletted { storages, .. } => {
+                        if let Some(s) = storages.first() {
+                            if let Some(indices) = &s.indices {
+                                for i in 0..4096 {
+                                    states[i] = s.states[indices[i] as usize].clone();
+                                }
+                            }
+                        }
+                    }
+                    _ => {
+                        return Err(format!(
+                            "区块 ({},{}) 子区块 {sy} 无法解码，已中止以避免损坏",
+                            chunk.x, chunk.z
+                        ))
+                    }
+                }
+            }
+            if let Some(placements) = chunks.get(&(chunk.x, chunk.z)).and_then(|m| m.get(&sy)) {
+                for (lx, ly, lz, id) in placements {
+                    let si = block_storage_index(*lx, *ly, *lz);
+                    states[si] = BlockState {
+                        name: normalize_block_id(id),
+                        states: BTreeMap::new(),
+                        version: Some(18_002_711),
+                    };
+                }
+            }
+
+            let y_base = layer * 16;
+            for i in 0..4096usize {
+                let (lx, lz, ly) = (i / 256, (i / 16) % 16, i % 16);
+                let st = &states[i];
+                let key = format!("{}|{:?}|{:?}", st.name, st.states, st.version);
+                let idx = if let Some(&j) = pmap.get(&key) {
+                    j
+                } else {
+                    let j = structure.palette.len();
+                    structure.palette.push(McStructurePaletteEntry {
+                        name: st.name.clone(),
+                        states: st.states.clone(),
+                        version: st.version,
+                    });
+                    pmap.insert(key, j);
+                    j
+                };
+                // 结构索引：x * (size_y * size_z) + y * size_z + z
+                let pos = lx * size.y as usize * 16 + (y_base + ly) * 16 + lz;
+                structure.primary_indices[pos] = idx as i32;
+            }
         }
 
         let guard = WriteGuard::confirmed(world_path, "colorify-ldb-write");
@@ -420,7 +471,7 @@ pub(crate) fn write_blocks_to_world(
                 McStructurePlacement {
                     source_anchor: chunk,
                     target_anchor: chunk,
-                    origin_y: i32::from(sy) * 16,
+                    origin_y: i32::from(min_sy) * 16,
                     rotation: McStructureRotation::None,
                     mirror_x: false,
                     mirror_z: false,
@@ -429,12 +480,17 @@ pub(crate) fn write_blocks_to_world(
                 |_| {},
             )
             .map_err(|e| format!("写入子区块失败: {e}"))?;
+
         done += 1;
-        progress.stage(&format!("写入世界 {done}/{total}"));
+        // 进度节流，避免大图几千次跨进程序列化
+        if done == total || last_report.elapsed() >= std::time::Duration::from_millis(150) {
+            progress.stage(&format!("写入世界 {done}/{total}"));
+            last_report = std::time::Instant::now();
+        }
     }
     timed!("写入世界");
 
-    // 补 Version
+    // 补 Version（缺失的记录合并成一次事务，避免每条一次 fsync）
     let version_keys: Vec<_> = affected
         .iter()
         .map(|c| ChunkKey::new(*c, ChunkRecordTag::Version).encode())
@@ -443,12 +499,18 @@ pub(crate) fn write_blocks_to_world(
         .storage()
         .get_many(&version_keys)
         .map_err(|e| format!("查询 Version 记录失败: {e}"))?;
+    let mut version_tx = world.transaction();
+    let mut version_fixup = false;
     for (chunk, value) in affected.iter().zip(version_values.iter()) {
         if value.is_none() {
-            world
-                .put_raw_record_blocking(&ChunkKey::new(*chunk, ChunkRecordTag::Version), &[42])
-                .map_err(|e| format!("补 Version 记录失败: {e}"))?;
+            version_fixup = true;
+            version_tx.put_raw_record(&ChunkKey::new(*chunk, ChunkRecordTag::Version), vec![42u8]);
         }
+    }
+    if version_fixup {
+        version_tx
+            .commit()
+            .map_err(|e| format!("补 Version 记录失败: {e}"))?;
     }
     timed!("补 Version");
 

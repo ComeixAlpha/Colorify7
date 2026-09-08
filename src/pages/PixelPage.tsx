@@ -300,7 +300,8 @@ export default function PixelPage({
     const palette = data.useStaircase
       ? Object.entries((staircase_palette as StaircasePaletteJson).data).map(
           ([key, hex]) => ({
-            id: key.replace("minecraft:", ""),
+            // 保留 minecraft: 前缀，世界存档需要完整 id
+            id: key,
             average: hexToRgb(hex),
           }),
         )
@@ -330,7 +331,11 @@ export default function PixelPage({
 
             return true;
           })
-          .map((p) => ({ id: p.id, average: p.average }));
+          .map((p) => ({
+            // 补全 minecraft: 前缀，世界存档需要完整 id
+            id: p.id.includes(":") ? p.id : `minecraft:${p.id}`,
+            average: p.average,
+          }));
 
     setProcessing(true);
     setDone(false);
