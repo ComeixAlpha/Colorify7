@@ -127,10 +127,42 @@ fn dist_mode(name: &str) -> Option<DistMode> {
 pub struct PaletteColorInput {
     pub id: String,
     pub average: [u8; 3],
+    #[serde(default)]
+    pub up: Option<[u8; 3]>,
+    #[serde(default)]
+    pub side: Option<[u8; 3]>,
+    #[serde(default)]
+    pub up_srgb: Option<[u8; 3]>,
+    #[serde(default)]
+    pub side_srgb: Option<[u8; 3]>,
 }
 
-pub fn palette_colors(palette: &[PaletteColorInput]) -> Vec<[u8; 3]> {
-    palette.iter().map(|c| c.average).collect()
+impl PaletteColorInput {
+    /// 按生成平面与色彩空间取代表色。
+    /// plane: 0 = xOy，1 = xOz，2 = yOz；xOz 用顶面，其余用侧面。
+    pub fn colour(&self, plane: i32, srgb: bool) -> [u8; 3] {
+        let up = plane == 1;
+        let (preferred, fallback) = if srgb {
+            (
+                if up { self.up_srgb } else { self.side_srgb },
+                if up { self.up } else { self.side },
+            )
+        } else {
+            (
+                if up { self.up } else { self.side },
+                if up { self.up_srgb } else { self.side_srgb },
+            )
+        };
+        preferred.or(fallback).unwrap_or(self.average)
+    }
+}
+
+pub fn palette_colors(
+    palette: &[PaletteColorInput],
+    plane: i32,
+    srgb: bool,
+) -> Vec<[u8; 3]> {
+    palette.iter().map(|c| c.colour(plane, srgb)).collect()
 }
 
 pub fn dither_image(

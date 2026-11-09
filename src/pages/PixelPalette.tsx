@@ -1,8 +1,8 @@
 import { M3eFormField } from "@m3e/react/all";
-import { useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
 import carpet_palette from "../assets/carpet_palette.json";
-import pixel_palette from "../assets/pixel_palette.json";
+import pixel_palette from "../assets/pixel_palette_v2.json";
 import PixelPaletteTile from "../components/PixelPaletteTile";
 import { Storer } from "../stores/storer";
 
@@ -10,7 +10,7 @@ interface IPixelPalette {
   palette: {
     id: string;
     cn: string;
-    average: [number, number, number];
+    average: number[];
   }[];
 }
 
@@ -36,6 +36,14 @@ export default function PixelPalette({
 
   const basePalette = carpetOnly ? carpetPalette : pixelPalette;
   const [search, setSearch] = useState("");
+  // 子项切换禁用后需要让计数跟着更新
+  const [, forceRender] = useReducer((x: number) => x + 1, 0);
+  useEffect(() => {
+    const onChange = () => forceRender();
+    window.addEventListener("colorify:palette-props-changed", onChange);
+    return () =>
+      window.removeEventListener("colorify:palette-props-changed", onChange);
+  }, []);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
@@ -54,6 +62,10 @@ export default function PixelPalette({
         };
 
   const props = Storer.load<PixelPaletteProps>("pixel_palette_props");
+  const totalCount = basePalette.palette.length;
+  const disabledCount = basePalette.palette.filter((p) =>
+    props.disabledIds.includes(p.id),
+  ).length;
 
   return (
     <div className="w-full h-full flex flex-col gap-4">
@@ -69,7 +81,7 @@ export default function PixelPalette({
             </span>
           </div>
 
-          <div className="flex gap-4 pt-2">
+          <div className="pt-2">
             <M3eFormField className="w-full shrink-0" hideSubscript="always">
               <label slot="label" htmlFor="search">
                 ID/Name
@@ -82,6 +94,12 @@ export default function PixelPalette({
                 className="w-full bg-transparent outline-none text-left"
               />
             </M3eFormField>
+            <span className="mt-1 block text-sm text-md-on-surface-variant">
+              {t("pages.pixel_palette.count", {
+                total: totalCount,
+                disabled: disabledCount,
+              })}
+            </span>
           </div>
         </div>
       </div>

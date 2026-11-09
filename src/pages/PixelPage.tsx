@@ -19,7 +19,7 @@ import type { ChangeEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import carpet_palette from "../assets/carpet_palette.json";
-import pixel_palette from "../assets/pixel_palette.json";
+import pixel_palette from "../assets/pixel_palette_v2.json";
 import staircase_palette from "../assets/staircase_palette.json";
 import TaskOverlay from "../components/TaskOverlay";
 import WorldPicker, { type WorldInfo } from "../components/WorldPicker";
@@ -30,7 +30,15 @@ import PixelPalette, { type PixelPaletteProps } from "./PixelPalette";
 import { AppSettings } from "./SettingsPage";
 
 interface PixelPaletteJson {
-  palette: { id: string; cn: string; average: [number, number, number] }[];
+  palette: {
+    id: string;
+    cn: string;
+    average: [number, number, number];
+    up?: [number, number, number];
+    side?: [number, number, number];
+    upSrgb?: [number, number, number];
+    sideSrgb?: [number, number, number];
+  }[];
 }
 
 interface StaircasePaletteJson {
@@ -87,6 +95,11 @@ const FORMULAS: readonly ColorDistanceFormula[] = [
   "CIEDE2000",
 ];
 
+/** 调色板代表色的计算方式（仅平面像素画生效） */
+type ColorSpace = "linear" | "srgb";
+
+const COLOR_SPACES: readonly ColorSpace[] = ["linear", "srgb"];
+
 enum DitheringAlgorithm {
   Atkinson = "Atkinson",
   Burkes = "Burkes",
@@ -121,6 +134,7 @@ export interface PixelParams {
   resizeInterpolation: ResizeInterpolation;
   generationPlane: GenerationPlane;
   colorDistanceFormula: ColorDistanceFormula;
+  colorSpace: ColorSpace;
   useStaircase: boolean;
   useStruct: boolean;
   useDithering: boolean;
@@ -153,6 +167,7 @@ export class PixelPageState extends PageState<PixelParams> {
       resizeInterpolation: "Nearest",
       generationPlane: "xOy",
       colorDistanceFormula: "RGB",
+      colorSpace: "linear",
       useStaircase: false,
       useStruct: false,
       useDithering: false,
@@ -335,6 +350,10 @@ export default function PixelPage({
             // 补全 minecraft: 前缀，世界存档需要完整 id
             id: p.id.includes(":") ? p.id : `minecraft:${p.id}`,
             average: p.average,
+            up: p.up,
+            side: p.side,
+            upSrgb: p.upSrgb,
+            sideSrgb: p.sideSrgb,
           }));
 
     setProcessing(true);
@@ -628,6 +647,41 @@ export default function PixelPage({
                       selected={data.colorDistanceFormula === opt}
                     >
                       {opt}
+                    </M3eOption>
+                  ))}
+                </M3eSelect>
+              </M3eFormField>
+            </div>
+          </div>
+
+          {/* 代表色计算方式 */}
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-col items-center gap-3 min-w-0">
+              <div className="flex flex-col min-w-0">
+                <span className="font-medium">
+                  {t("pages.pixel.argColorSpace")}
+                </span>
+                <span className="text-sm text-md-on-surface-variant">
+                  {t("pages.pixel.argColorSpaceDesc")}
+                </span>
+              </div>
+
+              <M3eFormField
+                className="w-60 shrink-0 pt-2"
+                hideSubscript="always"
+              >
+                <M3eSelect
+                  id="color-space-select"
+                  disabled={data.useStaircase}
+                  onChange={handleEnumChange("colorSpace", COLOR_SPACES)}
+                >
+                  {COLOR_SPACES.map((opt) => (
+                    <M3eOption
+                      key={opt}
+                      value={opt}
+                      selected={data.colorSpace === opt}
+                    >
+                      {t(`pages.pixel.colorSpace_${opt}`)}
                     </M3eOption>
                   ))}
                 </M3eSelect>

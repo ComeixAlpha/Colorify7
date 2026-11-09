@@ -53,3 +53,5 @@ coverage
 .github/modernize/
 
 scripts
+
+ignored

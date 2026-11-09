@@ -92,6 +92,11 @@
       "argColorDistance": "颜色距离",
       "argColorDistanceDesc": "使用的颜色距离公式",
 
+      "argColorSpace": "代表色计算",
+      "argColorSpaceDesc": "方块代表色的平均方式",
+      "colorSpace_linear": "线性光",
+      "colorSpace_srgb": "sRGB",
+
       "argStaircase": "阶梯式",
       "argStaircaseDesc": "是否启用阶梯式像素画",
 
@@ -254,7 +259,8 @@
     "pixel_palette": {
       "search": "搜索",
       "searchDesc": "通过 ID 或名称搜索",
-      "disabled": "已禁用"
+      "disabled": "已禁用",
+      "count": "共 {{total}} 项 · 禁用 {{disabled}} 项"
     },
     "ws": {
       "notRunningHint1": "Windows 用户请先解锁 UWP 应用回环，解锁方式请参考",

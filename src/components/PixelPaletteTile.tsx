@@ -1,5 +1,5 @@
 import i18n from "i18next";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Storer } from "../stores/storer";
 import { PixelPaletteProps } from "../pages/PixelPalette";
@@ -35,15 +35,22 @@ export default function PixelPaletteTile({
 
   const [isDisabled, setIsDisabled] = useState(disabled);
 
-  function handleClick() {
-    setIsDisabled(!isDisabled);
-    Storer.savePartial("pixel_palette_props", {
-      disabledIds: isDisabled
-        ? Storer.load<PixelPaletteProps>("pixel_palette_props").disabledIds.filter(
+  // 外部（切换地毯模式等）导致 props 变化时同步
+  useEffect(() => {
+    setIsDisabled(disabled);
+  }, [disabled]);
+
+  async function handleClick() {
+    const next = !isDisabled;
+    setIsDisabled(next);
+    await Storer.savePartial("pixel_palette_props", {
+      disabledIds: next
+        ? [...Storer.load<PixelPaletteProps>("pixel_palette_props").disabledIds, id]
+        : Storer.load<PixelPaletteProps>("pixel_palette_props").disabledIds.filter(
             (item: string) => item !== id,
-          )
-        : [...Storer.load<PixelPaletteProps>("pixel_palette_props").disabledIds, id],
+          ),
     });
+    window.dispatchEvent(new CustomEvent("colorify:palette-props-changed"));
   }
 
   return (
@@ -62,7 +69,7 @@ export default function PixelPaletteTile({
           ${isDisabled ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}
         `}
       >
-        <p className="--color-md-error text-center">{t("pages.pixel_palette.disabled")}</p>
+        <p className="text-md-error text-center">{t("pages.pixel_palette.disabled")}</p>
       </div>
     </div>
   );

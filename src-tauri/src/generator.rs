@@ -26,6 +26,8 @@ pub struct GenParams {
     pub socket_output: bool,
     /// 直写 LevelDB 世界：收集方块列表 (x, y, z, id)，不写文件/命令
     pub ldb_output: bool,
+    /// 代表色是否使用 sRGB 平均（false = 线性光平均）
+    pub color_space_srgb: bool,
 }
 
 pub struct GenOutput {
@@ -71,7 +73,10 @@ pub fn generate<'a>(
     }
     let (width, height) = (w as usize, h as usize);
 
-    let full_rgb: Vec<[u8; 3]> = palette.iter().map(|e| e.average).collect();
+    let full_rgb: Vec<[u8; 3]> = palette
+        .iter()
+        .map(|e| e.colour(params.plane, params.color_space_srgb))
+        .collect();
     let full_ids: Vec<&str> = palette.iter().map(|e| e.id.as_str()).collect();
 
     let mut commands: Vec<String> = Vec::new();

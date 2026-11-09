@@ -21,6 +21,10 @@ fn default_true() -> bool {
     true
 }
 
+fn default_color_space() -> String {
+    "linear".to_string()
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[allow(dead_code)]
@@ -48,6 +52,9 @@ pub struct PixelParams {
     #[serde(default = "default_true")]
     pub staircase_compress: bool,
     pub ws_command_delay: i32,
+    /// 代表色色彩空间："linear"（线性光平均）或 "srgb"（sRGB 平均）
+    #[serde(default = "default_color_space")]
+    pub color_space: String,
 
     #[serde(default)]
     pub auto_slice_mcfunction: bool,
@@ -133,13 +140,16 @@ impl ArtGenerator for PixelPipeline {
             None
         };
 
+        let srgb = params.color_space.eq_ignore_ascii_case("srgb");
+        let plane = common::plane_index(&params.generation_plane);
+
         // 抖动
         if params.use_dithering && !params.use_staircase {
             progress.stage("抖动处理");
             if progress.cancelled() {
                 return Err("已取消".into());
             }
-            let colors = image_ditherer::palette_colors(palette);
+            let colors = image_ditherer::palette_colors(palette, plane, srgb);
             if colors.is_empty() {
                 eprintln!("[pixel] 无可用调色板，跳过抖动");
             } else if image_ditherer::dither_image(
@@ -161,7 +171,7 @@ impl ArtGenerator for PixelPipeline {
         // 匹配方块
         progress.stage("匹配方块");
         let gen_params = generator::GenParams {
-            plane: common::plane_index(&params.generation_plane),
+            plane,
             color_distance: params.color_distance_formula.clone(),
             use_staircase: params.use_staircase,
             use_struct: if params.use_socket {
@@ -180,6 +190,7 @@ impl ArtGenerator for PixelPipeline {
             use_dithering: params.use_dithering,
             socket_output: params.use_socket,
             ldb_output: params.use_ldb,
+            color_space_srgb: srgb,
         };
         let output = generator::generate(
             img,

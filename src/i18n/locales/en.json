@@ -92,6 +92,11 @@
       "argColorDistance": "Color Distance",
       "argColorDistanceDesc": "The color distance formula used",
 
+      "argColorSpace": "Color Calculation",
+      "argColorSpaceDesc": "How each block's representative color is averaged from its texture; flat pixel art only",
+      "colorSpace_linear": "Linear light",
+      "colorSpace_srgb": "sRGB",
+
       "argStaircase": "Staircase",
       "argStaircaseDesc": "Whether to enable staircase type art",
 
@@ -254,7 +259,8 @@
     "pixel_palette": {
       "search": "Search",
       "searchDesc": "Search by id or name",
-      "disabled": "Disabled"
+      "disabled": "Disabled",
+      "count": "{{total}} blocks · {{disabled}} disabled"
     },
     "ws": {
       "notRunningHint1": "On Windows, please unlock the UWP app loopback first. See:",
