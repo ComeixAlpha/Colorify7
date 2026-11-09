@@ -24,6 +24,7 @@ import staircase_palette from "../assets/staircase_palette.json";
 import TaskOverlay from "../components/TaskOverlay";
 import WorldPicker, { type WorldInfo } from "../components/WorldPicker";
 import { useIsNarrow } from "../hooks/useIsNarrow";
+import { isAvailable } from "../lib/versions";
 import { PageState } from "../session/PageState";
 import { Storer } from "../stores/storer";
 import PixelPalette, { type PixelPaletteProps } from "./PixelPalette";
@@ -38,12 +39,18 @@ interface PixelPaletteJson {
     side?: [number, number, number];
     upSrgb?: [number, number, number];
     sideSrgb?: [number, number, number];
+    since?: string | null;
   }[];
 }
 
 interface StaircasePaletteJson {
   data: Record<string, string>;
 }
+
+/** 方块 id（不含 minecraft: 前缀）-> 首次出现版本 */
+const SINCE_BY_ID = new Map<string, string | null>(
+  pixel_palette.palette.map((p) => [p.id, p.since ?? null]),
+);
 
 /** "#RRGGBB" -> [r, g, b]（0-255） */
 function hexToRgb(hex: string): [number, number, number] {
@@ -197,8 +204,10 @@ export class PixelPageState extends PageState<PixelParams> {
 export const pixelPageState = new PixelPageState();
 
 export default function PixelPage({
+  targetVersion,
   onOpenWsPage,
 }: {
+  targetVersion: string;
   onOpenWsPage?: () => void;
 }) {
   const { t } = useTranslation();
@@ -313,18 +322,24 @@ export default function PixelPage({
       "pixel_palette_props",
     );
     const palette = data.useStaircase
-      ? Object.entries((staircase_palette as StaircasePaletteJson).data).map(
-          ([key, hex]) => ({
+      ? Object.entries((staircase_palette as StaircasePaletteJson).data)
+          .filter(([key]) =>
+            isAvailable(SINCE_BY_ID.get(key.replace(/^minecraft:/, "")), targetVersion),
+          )
+          .map(([key, hex]) => ({
             // 保留 minecraft: 前缀，世界存档需要完整 id
             id: key,
             average: hexToRgb(hex),
-          }),
-        )
+          }))
       : (data.carpetOnly
           ? (carpet_palette as PixelPaletteJson).palette
           : (pixel_palette as PixelPaletteJson).palette
         )
           .filter((p) => {
+            if (!isAvailable(p.since, targetVersion)) {
+              return false;
+            }
+
             if (paletteProps.disabledIds.includes(p.id)) {
               return false;
             }
@@ -1167,7 +1182,11 @@ export default function PixelPage({
           }
         >
           <div className="w-full h-full">
-            <PixelPalette carpetOnly={data.carpetOnly} />
+            <PixelPalette
+              carpetOnly={data.carpetOnly}
+              colorSpace={data.colorSpace}
+              targetVersion={targetVersion}
+            />
           </div>
         </div>
       </div>

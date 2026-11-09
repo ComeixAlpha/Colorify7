@@ -9,6 +9,7 @@ import {
 import { useState, type ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import i18n, { AppLanguage, normalizeLanguage } from "../i18n";
+import { MC_VERSIONS, TARGET_LATEST } from "../lib/versions";
 import { Storer } from "../stores/storer";
 
 export interface AppSettings {
@@ -17,6 +18,10 @@ export interface AppSettings {
   autoSliceMcfunction: boolean;
   previewImage: boolean;
   webSocketPort: number;
+  /** 像素画目标版本；"latest" 表示最新 */
+  targetVersion: string;
+  /** 是否已经询问过目标版本（用于首次启动弹窗） */
+  targetVersionAsked: boolean;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -25,19 +30,26 @@ export const DEFAULT_SETTINGS: AppSettings = {
   autoSliceMcfunction: true,
   previewImage: true,
   webSocketPort: 8080,
+  targetVersion: "latest",
+  targetVersionAsked: false,
 };
 
 interface SettingsPageProps {
   seedColor: string;
   onSeedColorChange: (color: string) => void;
+  targetVersion: string;
+  onTargetVersionChange: (version: string) => void;
 }
 
 export default function SettingsPage({
   seedColor,
   onSeedColorChange,
+  targetVersion,
+  onTargetVersionChange,
 }: SettingsPageProps) {
   const { t } = useTranslation();
   const language = i18n.language === "en" ? "en" : "zh";
+  const [versionOptions] = useState(() => [...MC_VERSIONS].reverse());
 
   const [autoSliceMcfunction, setAutoSliceMcfunction] = useState(
     Storer.load<AppSettings>("settings").autoSliceMcfunction,
@@ -77,6 +89,11 @@ export default function SettingsPage({
     const port = Math.min(65535, Math.max(1, Math.trunc(parsed)));
     setWebSocketPort(port);
     Storer.savePartial("settings", { webSocketPort: port });
+  };
+
+  const handleTargetVersionChange = (e: Event) => {
+    const value = (e.target as any)?.value;
+    if (typeof value === "string" && value) onTargetVersionChange(value);
   };
 
   return (
@@ -149,6 +166,46 @@ export default function SettingsPage({
             aria-label={t("settings.themeColorLabel")}
             className="w-12 h-9 shrink-0 rounded-md bg-transparent cursor-pointer"
           />
+        </div>
+
+        {/* 目标版本 */}
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <M3eIcon
+              name="update"
+              className="text-md-on-surface-variant shrink-0"
+            />
+            <div className="flex flex-col min-w-0">
+              <span className="font-medium">
+                {t("settings.targetVersionLabel")}
+              </span>
+              <span className="text-xs text-md-on-surface-variant">
+                {t("settings.targetVersionDesc")}
+              </span>
+            </div>
+          </div>
+
+          <M3eFormField className="w-40 shrink-0" hideSubscript="always">
+            <label slot="label" htmlFor="target-version-select">
+              {t("settings.targetVersionLabel")}
+            </label>
+            <M3eSelect
+              id="target-version-select"
+              onChange={handleTargetVersionChange}
+            >
+              <M3eOption
+                value={TARGET_LATEST}
+                selected={targetVersion === TARGET_LATEST}
+              >
+                {t("settings.targetVersionLatest")}
+              </M3eOption>
+              {versionOptions.map((v) => (
+                <M3eOption key={v} value={v} selected={targetVersion === v}>
+                  {v}
+                </M3eOption>
+              ))}
+            </M3eSelect>
+          </M3eFormField>
         </div>
 
         {/* 自动切分 mcfunction */}

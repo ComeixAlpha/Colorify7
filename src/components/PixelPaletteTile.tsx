@@ -7,12 +7,14 @@ import { PixelPaletteProps } from "../pages/PixelPalette";
 
 
 export default function PixelPaletteTile({
-  color,
+  upColor,
+  sideColor,
   id,
   name,
-  disabled
+  disabled,
 }: {
-  color: string;
+  upColor: string;
+  sideColor: string;
   id: string;
   name: string;
   disabled: boolean;
@@ -58,7 +60,10 @@ export default function PixelPaletteTile({
       <div className="flex items-center gap-2 ">
         <div
           className="w-12 h-12 rounded-lg"
-          style={{ backgroundColor: color }}
+          title={t("pages.pixel_palette.swatchHint")}
+          style={{
+            background: `linear-gradient(135deg, ${upColor} 0 50%, ${sideColor} 50% 100%)`,
+          }}
         />
         {display}
       </div>

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import carpet_palette from "../assets/carpet_palette.json";
 import pixel_palette from "../assets/pixel_palette_v2.json";
 import PixelPaletteTile from "../components/PixelPaletteTile";
+import { isAvailable } from "../lib/versions";
 import { Storer } from "../stores/storer";
 
 interface IPixelPalette {
@@ -11,6 +12,11 @@ interface IPixelPalette {
     id: string;
     cn: string;
     average: number[];
+    up?: number[];
+    side?: number[];
+    upSrgb?: number[];
+    sideSrgb?: number[];
+    since?: string | null;
   }[];
 }
 
@@ -29,8 +35,12 @@ const carpetPalette: IPixelPalette = carpet_palette as IPixelPalette;
 
 export default function PixelPalette({
   carpetOnly = false,
+  colorSpace = "linear",
+  targetVersion = "latest",
 }: {
   carpetOnly?: boolean;
+  colorSpace?: "linear" | "srgb";
+  targetVersion?: string;
 }) {
   const { t } = useTranslation();
 
@@ -49,11 +59,15 @@ export default function PixelPalette({
     setSearch(e.target.value);
   };
 
+  const available = basePalette.palette.filter((item) =>
+    isAvailable(item.since, targetVersion),
+  );
+
   const palette: IPixelPalette =
     search === ""
-      ? basePalette
+      ? { palette: available }
       : {
-          palette: basePalette.palette.filter((item) => {
+          palette: available.filter((item) => {
             const q = search.toLowerCase();
             const idMatch = item.id.toLowerCase().includes(q);
             const nameMatch = item.cn.toLowerCase().includes(q);
@@ -62,8 +76,8 @@ export default function PixelPalette({
         };
 
   const props = Storer.load<PixelPaletteProps>("pixel_palette_props");
-  const totalCount = basePalette.palette.length;
-  const disabledCount = basePalette.palette.filter((p) =>
+  const totalCount = available.length;
+  const disabledCount = available.filter((p) =>
     props.disabledIds.includes(p.id),
   ).length;
 
@@ -107,15 +121,25 @@ export default function PixelPalette({
         className="flex flex-1 flex-col min-h-0 gap-6 items-start overflow-y-auto scrollbar-thin"
         style={{ justifyContent: "safe center" }}
       >
-        {palette.palette.map((item) => (
-          <PixelPaletteTile
-            key={item.id}
-            color={`rgb(${item.average.join(", ")})`}
-            id={item.id}
-            name={item.cn}
-            disabled={props.disabledIds.includes(item.id)}
-          />
-        ))}
+        {palette.palette.map((item) => {
+          const up =
+            (colorSpace === "srgb" ? item.upSrgb ?? item.up : item.up) ??
+            item.average;
+          const side =
+            (colorSpace === "srgb"
+              ? item.sideSrgb ?? item.side
+              : item.side) ?? item.average;
+          return (
+            <PixelPaletteTile
+              key={item.id}
+              upColor={`rgb(${up.join(", ")})`}
+              sideColor={`rgb(${side.join(", ")})`}
+              id={item.id}
+              name={item.cn}
+              disabled={props.disabledIds.includes(item.id)}
+            />
+          );
+        })}
       </div>
     </div>
   );

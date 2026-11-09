@@ -260,7 +260,8 @@
       "search": "搜索",
       "searchDesc": "通过 ID 或名称搜索",
       "disabled": "已禁用",
-      "count": "共 {{total}} 项 · 禁用 {{disabled}} 项"
+      "count": "共 {{total}} 项 · 禁用 {{disabled}} 项",
+      "swatchHint": "斜分：左上为顶面（xOz），右下为侧面（xOy / yOz）"
     },
     "ws": {
       "notRunningHint1": "Windows 用户请先解锁 UWP 应用回环，解锁方式请参考",
@@ -366,6 +367,11 @@
       "hcdyx": "灰常的优秀"
     }
   },
+  "versionSetup": {
+    "title": "选择你的游戏版本",
+    "body": "生成的像素画只会使用该版本已有的方块。较老版本中，木板、羊毛等方块可能因旧版 ID 不同而暂时被省略。之后可以在设置里随时修改。",
+    "confirm": "确定"
+  },
   "settings": {
     "title": "设置",
     "general": "通用",
@@ -374,6 +380,9 @@
     "languageSelectLabel": "语言",
     "themeColorLabel": "主题色",
     "themeColorDesc": "选择主题种子色",
+    "targetVersionLabel": "目标版本",
+    "targetVersionDesc": "像素画只使用该版本及更早版本已有的方块",
+    "targetVersionLatest": "永远保持最新版本",
     "previewImageLabel": "输出预览图",
     "previewImageDesc": "是否输出预览图片",
     "autoSliceMcfunctionLabel": "自动切分 mcfunction",

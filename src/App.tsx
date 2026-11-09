@@ -2,12 +2,15 @@ import {
   M3eAppBar,
   M3eButton,
   M3eDrawerContainer,
+  M3eFormField,
   M3eHeading,
   M3eIcon,
   M3eIconButton,
   M3eNavMenu,
   M3eNavMenuItem,
   M3eNavMenuItemGroup,
+  M3eOption,
+  M3eSelect,
   M3eTheme,
 } from "@m3e/react/all";
 import { invoke } from "@tauri-apps/api/core";
@@ -21,6 +24,7 @@ import {
 import { useTranslation } from "react-i18next";
 import "./App.css";
 import { useIsNarrow } from "./hooks/useIsNarrow";
+import { MC_VERSIONS, TARGET_LATEST } from "./lib/versions";
 import AboutPage from "./pages/AboutPage";
 import FaqPage from "./pages/FaqPage";
 import ObjToVoxelPage from "./pages/ObjToVoxelPage";
@@ -53,6 +57,14 @@ export default function App({ initialSettings }: AppProps = {}) {
   const [seedColor, setSeedColor] = useState(
     initialSettings?.seedColor ?? DEFAULT_SEED_COLOR,
   );
+  // 像素画目标版本（用于过滤新方块）
+  const [targetVersion, setTargetVersion] = useState(
+    initialSettings?.targetVersion ?? TARGET_LATEST,
+  );
+  const [versionDialogOpen, setVersionDialogOpen] = useState(
+    !(initialSettings?.targetVersionAsked ?? false),
+  );
+  const [pendingVersion, setPendingVersion] = useState(targetVersion);
 
   // 960px 响应式布局
   const isNarrow = useIsNarrow();
@@ -127,6 +139,19 @@ export default function App({ initialSettings }: AppProps = {}) {
       seedSaveTimer.current = null;
       Storer.savePartial("settings", { seedColor: pendingSeedColor.current });
     }, SEED_SAVE_DEBOUNCE_MS);
+  };
+
+  const handleTargetVersionChange = (version: string) => {
+    setTargetVersion(version);
+    void Storer.savePartial("settings", {
+      targetVersion: version,
+      targetVersionAsked: true,
+    });
+  };
+
+  const confirmInitialVersion = () => {
+    handleTargetVersionChange(pendingVersion);
+    setVersionDialogOpen(false);
   };
 
   useEffect(() => {
@@ -284,6 +309,7 @@ export default function App({ initialSettings }: AppProps = {}) {
                 )}
                 {currentTab === Pages.Pixel && (
                   <PixelPage
+                    targetVersion={targetVersion}
                     onOpenWsPage={() => setCurrentTab(Pages.WebSocket)}
                   />
                 )}
@@ -299,6 +325,8 @@ export default function App({ initialSettings }: AppProps = {}) {
                   <SettingsPage
                     seedColor={seedColor}
                     onSeedColorChange={handleSeedColorChange}
+                    targetVersion={targetVersion}
+                    onTargetVersionChange={handleTargetVersionChange}
                   />
                 )}
               </div>
@@ -339,6 +367,47 @@ export default function App({ initialSettings }: AppProps = {}) {
                   }}
                 >
                   {t("app.storagePermissionOpen")}
+                </M3eButton>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* 首次启动：目标版本询问 */}
+        {versionDialogOpen && (
+          <div className="fixed inset-0 z-[70] grid place-items-center bg-md-scrim/60 p-4">
+            <div className="flex w-96 max-w-full flex-col gap-4 rounded-md-xl bg-md-surface-container p-5 shadow-lg">
+              <span className="text-lg font-medium text-md-on-surface">
+                {t("versionSetup.title")}
+              </span>
+              <p className="text-sm leading-relaxed text-md-on-surface-variant">
+                {t("versionSetup.body")}
+              </p>
+              <M3eFormField className="w-full" hideSubscript="always">
+                <label slot="label" htmlFor="initial-target-version">
+                  {t("settings.targetVersionLabel")}
+                </label>
+                <M3eSelect
+                  id="initial-target-version"
+                  onChange={(e) =>
+                    setPendingVersion((e.target as unknown as { value: string }).value)
+                  }
+                >
+                  <M3eOption
+                    value={TARGET_LATEST}
+                    selected={pendingVersion === TARGET_LATEST}
+                  >
+                    {t("settings.targetVersionLatest")}
+                  </M3eOption>
+                  {[...MC_VERSIONS].reverse().map((v) => (
+                    <M3eOption key={v} value={v} selected={pendingVersion === v}>
+                      {v}
+                    </M3eOption>
+                  ))}
+                </M3eSelect>
+              </M3eFormField>
+              <div className="flex justify-end gap-2">
+                <M3eButton variant="filled" onClick={confirmInitialVersion}>
+                  {t("versionSetup.confirm")}
                 </M3eButton>
               </div>
             </div>

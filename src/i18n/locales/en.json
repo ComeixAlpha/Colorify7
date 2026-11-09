@@ -260,7 +260,8 @@
       "search": "Search",
       "searchDesc": "Search by id or name",
       "disabled": "Disabled",
-      "count": "{{total}} blocks · {{disabled}} disabled"
+      "count": "{{total}} blocks · {{disabled}} disabled",
+      "swatchHint": "Diagonal split: top-left = top face (xOz), bottom-right = side face (xOy / yOz)"
     },
     "ws": {
       "notRunningHint1": "On Windows, please unlock the UWP app loopback first. See:",
@@ -366,6 +367,11 @@
       "hcdyx": "灰常的优秀"
     }
   },
+  "versionSetup": {
+    "title": "Choose your game version",
+    "body": "Pixel art will only use blocks that already exist in the selected version. On older versions some blocks (planks, wool, etc.) may be omitted because of legacy ID differences. You can change this later in Settings.",
+    "confirm": "OK"
+  },
   "settings": {
     "title": "Settings",
     "general": "General",
@@ -374,6 +380,9 @@
     "languageSelectLabel": "Language",
     "themeColorLabel": "Theme Color",
     "themeColorDesc": "Seed color that derives the whole color palette",
+    "targetVersionLabel": "Target Version",
+    "targetVersionDesc": "Pixel art only uses blocks available in this version or earlier",
+    "targetVersionLatest": "Always latest",
     "previewImageLabel": "Output Preview Image",
     "previewImageDesc": "Whether to output a preview image",
     "autoSliceMcfunctionLabel": "Auto-split mcfunction",
