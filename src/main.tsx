@@ -4,6 +4,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./App.css";
+import ErrorBoundary from "./components/ErrorBoundary";
 import { initI18n, normalizeLanguage } from "./i18n";
 import { AppSettings, DEFAULT_SETTINGS } from "./pages/SettingsPage";
 import { Storer } from "./stores/storer";
@@ -29,11 +30,19 @@ async function bootstrap() {
 
   ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
-      <App initialSettings={settings} />
+      <ErrorBoundary>
+        <App initialSettings={settings} />
+      </ErrorBoundary>
     </React.StrictMode>,
   );
 
+  // 通知 index.html 的启动兜底脚本：应用已挂载，可以移除加载提示/取消超时诊断
+  window.__colorifyBooted?.();
   showWindowWhenReady();
 }
 
-void bootstrap();
+void bootstrap().catch((error) => {
+  // 渲染前的失败（设置读取、i18n、动态 import 等）交给启动兜底脚本展示
+  window.__colorifyShowError?.(error);
+  console.error("[colorify] bootstrap failed:", error);
+});

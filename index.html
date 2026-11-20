@@ -14,11 +14,310 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tauri + React + Typescript</title>
+    <title>Colorify 7</title>
   </head>
 
   <body>
     <div id="root"></div>
+
+     <!-- 启动兜底 -->
+    <script>
+      (function () {
+        var w = window;
+        var d = document;
+        var booted = false;
+        var panelShown = false;
+        var zh = (navigator.language || "").toLowerCase().indexOf("zh") === 0;
+
+        function t(zhText, enText) {
+          return zh ? zhText : enText;
+        }
+
+        function esc(value) {
+          return String(value == null ? "" : value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+        }
+
+        function ua() {
+          return navigator.userAgent || "";
+        }
+
+        function chromeMajor() {
+          var m = ua().match(/Chrome\/(\d+)/);
+          return m ? parseInt(m[1], 10) : 0;
+        }
+
+        function isAndroid() {
+          return /Android/i.test(ua());
+        }
+
+        function isWebView() {
+          return /\bwv\b/i.test(ua());
+        }
+
+        function check(name, fn) {
+          try {
+            return { name: name, ok: !!fn() };
+          } catch (e) {
+            return { name: name, ok: false };
+          }
+        }
+
+        function features() {
+          return [
+            check("customElements", function () {
+              return w.customElements && w.customElements.define;
+            }),
+            check("Shadow DOM", function () {
+              return !!Element.prototype.attachShadow;
+            }),
+            check("adoptedStyleSheets", function () {
+              return "adoptedStyleSheets" in d;
+            }),
+            check("replaceAll", function () {
+              return typeof String.prototype.replaceAll === "function";
+            }),
+            check("ResizeObserver", function () {
+              return typeof w.ResizeObserver === "function";
+            }),
+            check("structuredClone", function () {
+              return typeof w.structuredClone === "function";
+            }),
+            check("Promise.allSettled", function () {
+              return typeof Promise.allSettled === "function";
+            }),
+            check("Object.fromEntries", function () {
+              return typeof Object.fromEntries === "function";
+            }),
+          ];
+        }
+
+        function diagText(error) {
+          var lines = [];
+          lines.push("=== Colorify boot diagnostics ===");
+          lines.push("time: " + new Date().toISOString());
+          lines.push("url: " + w.location.href);
+          lines.push("language: " + (navigator.language || "?"));
+          lines.push("android: " + (isAndroid() ? "yes" : "no"));
+          lines.push("webview: " + (isWebView() ? "yes" : "no"));
+          lines.push("chrome: " + (chromeMajor() || "unknown"));
+          lines.push("tauri: " + (w.__TAURI_INTERNALS__ ? "yes" : "no"));
+          lines.push("ua: " + ua());
+          lines.push("features:");
+          var list = features();
+          for (var i = 0; i < list.length; i++) {
+            lines.push("  " + (list[i].ok ? "[ok] " : "[--] ") + list[i].name);
+          }
+          lines.push("error: " + (error ? error : "(none)"));
+          return lines.join("\n");
+        }
+
+        function style() {
+          if (d.getElementById("colorify-boot-style")) return;
+          var s = d.createElement("style");
+          s.id = "colorify-boot-style";
+          s.textContent = [
+            "#colorify-boot-loading{position:fixed;left:0;right:0;top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#111318;color:#d0d3dc;font-family:system-ui,-apple-system,sans-serif;z-index:2147483646}",
+            "#colorify-boot-loading .c-spin{width:32px;height:32px;border:3px solid rgba(255,255,255,.15);border-top-color:#a8c7fa;border-radius:50%;animation:c-spin .8s linear infinite}",
+            "@keyframes c-spin{to{transform:rotate(360deg)}}",
+            "#colorify-boot-panel{position:fixed;left:0;right:0;top:0;bottom:0;overflow:auto;-webkit-overflow-scrolling:touch;background:#0d0f13;color:#e6e8ee;font-family:system-ui,-apple-system,sans-serif;z-index:2147483647;padding:24px 20px;box-sizing:border-box}",
+            "#colorify-boot-panel .c-title{font-size:18px;font-weight:600;margin:0 0 8px}",
+            "#colorify-boot-panel .c-intro{font-size:13px;line-height:1.6;color:#aab0bd;margin:0 0 16px;white-space:pre-wrap}",
+            "#colorify-boot-panel .c-label{font-size:12px;letter-spacing:.04em;color:#8e94a3;margin:0 0 6px}",
+            "#colorify-boot-panel pre{white-space:pre-wrap;word-break:break-word;background:#161a22;border:1px solid #242a36;border-radius:8px;padding:12px;font-size:12px;line-height:1.5;margin:0 0 16px;max-height:46vh;overflow:auto}",
+            "#colorify-boot-panel .c-actions{display:flex;flex-wrap:wrap;gap:8px}",
+            "#colorify-boot-panel button{appearance:none;border:1px solid #2c3342;background:#1b2029;color:#e6e8ee;border-radius:999px;padding:8px 16px;font-size:13px}",
+          ].join("");
+          d.head.appendChild(s);
+        }
+
+        function showLoading() {
+          if (d.getElementById("colorify-boot-loading")) return;
+          style();
+          var el = d.createElement("div");
+          el.id = "colorify-boot-loading";
+          el.innerHTML =
+            '<div class="c-spin"></div><div>' +
+            esc(t("正在启动 Colorify…", "Starting Colorify…")) +
+            "</div>";
+          d.body.appendChild(el);
+        }
+
+        function hideLoading() {
+          var el = d.getElementById("colorify-boot-loading");
+          if (el && el.parentNode) el.parentNode.removeChild(el);
+        }
+
+        function showPanel(title, intro, error) {
+          if (panelShown) return;
+          panelShown = true;
+          hideLoading();
+          style();
+          var text = diagText(error);
+          var box = d.createElement("div");
+          box.id = "colorify-boot-panel";
+          box.innerHTML =
+            '<div class="c-title">' +
+            esc(title) +
+            "</div>" +
+            '<div class="c-intro">' +
+            esc(intro) +
+            "</div>" +
+            '<div class="c-label">' +
+            esc(t("诊断信息", "Diagnostics")) +
+            "</div>" +
+            '<pre id="colorify-diag-text">' +
+            esc(text) +
+            "</pre>" +
+            '<div class="c-actions">' +
+            '<button id="colorify-diag-copy">' +
+            esc(t("复制诊断信息", "Copy diagnostics")) +
+            "</button>" +
+            '<button id="colorify-diag-reload">' +
+            esc(t("重新加载", "Reload")) +
+            "</button>" +
+            '<button id="colorify-diag-hide">' +
+            esc(t("隐藏此面板", "Hide panel")) +
+            "</button>" +
+            "</div>";
+          d.body.appendChild(box);
+
+          d.getElementById("colorify-diag-copy").onclick = function () {
+            var value = diagText(error);
+            var button = d.getElementById("colorify-diag-copy");
+            function done() {
+              button.textContent = t("已复制", "Copied");
+            }
+            function fallback() {
+              try {
+                var pre = d.getElementById("colorify-diag-text");
+                var range = d.createRange();
+                range.selectNodeContents(pre);
+                var sel = w.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(range);
+                d.execCommand("copy");
+                done();
+              } catch (e) {
+                /* ignore */
+              }
+            }
+            try {
+              if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(value).then(done, fallback);
+              } else {
+                fallback();
+              }
+            } catch (e) {
+              fallback();
+            }
+          };
+          d.getElementById("colorify-diag-reload").onclick = function () {
+            w.location.reload();
+          };
+          d.getElementById("colorify-diag-hide").onclick = function () {
+            if (box.parentNode) box.parentNode.removeChild(box);
+          };
+        }
+
+        w.__colorifyShowError = function (error) {
+          try {
+            var message = "";
+            if (error && (error.stack || error.message)) {
+              message = error.stack || error.message;
+            } else if (error) {
+              message = String(error);
+            }
+            showPanel(
+              t("Colorify 启动失败", "Colorify failed to start"),
+              t(
+                "应用在启动过程中出错。请把下面的诊断信息发给开发者，或更新系统 WebView 后重试。",
+                "The app hit an error while starting. Please send the diagnostics below to the developer, or update the System WebView and try again.",
+              ),
+              message,
+            );
+          } catch (e) {
+            /* ignore */
+          }
+        };
+
+        w.__colorifyBooted = function () {
+          booted = true;
+          hideLoading();
+        };
+
+        w.onerror = function (message, source, lineno, colno, error) {
+          w.__colorifyShowError(
+            error || message + " @" + source + ":" + lineno + ":" + colno,
+          );
+          return false;
+        };
+
+        w.addEventListener("unhandledrejection", function (event) {
+          // 启动完成后的零散 Promise 拒绝不覆盖界面；启动阶段的失败才展示诊断
+          if (!booted) w.__colorifyShowError(event && event.reason);
+        });
+
+        // 手动触发诊断面板：?colorify-diag=1
+        if ((w.location.search || "").indexOf("colorify-diag=1") >= 0) {
+          showPanel(
+            t("诊断面板", "Diagnostics panel"),
+            t("这是手动触发的诊断信息。", "This panel was opened manually."),
+            null,
+          );
+        } else {
+          showLoading();
+
+          if (isAndroid()) {
+            var missing = [];
+            var list = features();
+            var critical = {
+              customElements: 1,
+              "Shadow DOM": 1,
+              adoptedStyleSheets: 1,
+              replaceAll: 1,
+              ResizeObserver: 1,
+            };
+            for (var i = 0; i < list.length; i++) {
+              if (critical[list[i].name] && !list[i].ok) {
+                missing.push(list[i].name);
+              }
+            }
+            var major = chromeMajor();
+            if (missing.length || (major > 0 && major < 85)) {
+              showPanel(
+                t("系统 WebView 版本过低", "System WebView is too old"),
+                t(
+                  "当前系统 WebView 缺少 Colorify 需要的能力（" +
+                    (missing.join("、") || "Chromium " + major) +
+                    "）。请更新「Android System WebView」或系统后重试。",
+                  "The System WebView is missing features Colorify requires (" +
+                    (missing.join(", ") || "Chromium " + major) +
+                    '). Please update "Android System WebView" or your system and try again.',
+                ),
+                null,
+              );
+            }
+          }
+
+          w.setTimeout(function () {
+            if (!booted && !panelShown) {
+              showPanel(
+                t("启动超时", "Startup timed out"),
+                t(
+                  "应用在 15 秒内没有完成启动。请把下面的诊断信息发给开发者。",
+                  "The app did not finish starting within 15 seconds. Please send the diagnostics below to the developer.",
+                ),
+                null,
+              );
+            }
+          }, 15000);
+        }
+      })();
+    </script>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
