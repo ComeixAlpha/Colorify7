@@ -7,6 +7,7 @@ import "./App.css";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { initI18n, normalizeLanguage } from "./i18n";
 import { AppSettings, DEFAULT_SETTINGS } from "./pages/SettingsPage";
+import { loadDisabledIds } from "./stores/pixelPaletteProps";
 import { Storer } from "./stores/storer";
 
 Storer.registerDefaults("settings", DEFAULT_SETTINGS);
@@ -25,7 +26,10 @@ function showWindowWhenReady() {
 }
 
 async function bootstrap() {
-  const settings = await Storer.loadPref<AppSettings>("settings");
+  const [settings] = await Promise.all([
+    Storer.loadPref<AppSettings>("settings"),
+    loadDisabledIds(),
+  ]);
   await initI18n(normalizeLanguage(settings.language));
 
   ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(

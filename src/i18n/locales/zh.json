@@ -260,6 +260,10 @@
       "search": "搜索",
       "searchDesc": "通过 ID 或名称搜索",
       "disabled": "已禁用",
+      "filterLabel": "筛选",
+      "filterEnabled": "已启用",
+      "filterDisabled": "已禁用",
+      "filterEmpty": "没有符合当前筛选的方块",
       "count": "共 {{total}} 项 · 禁用 {{disabled}} 项",
       "swatchHint": "斜分：左上为顶面（xOz），右下为侧面（xOy / yOz）"
     },

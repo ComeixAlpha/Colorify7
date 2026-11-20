@@ -260,6 +260,10 @@
       "search": "Search",
       "searchDesc": "Search by id or name",
       "disabled": "Disabled",
+      "filterLabel": "Filter",
+      "filterEnabled": "Enabled",
+      "filterDisabled": "Disabled",
+      "filterEmpty": "No blocks match the current filter",
       "count": "{{total}} blocks · {{disabled}} disabled",
       "swatchHint": "Diagonal split: top-left = top face (xOz), bottom-right = side face (xOy / yOz)"
     },

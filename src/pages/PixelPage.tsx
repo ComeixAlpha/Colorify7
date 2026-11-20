@@ -26,8 +26,9 @@ import WorldPicker, { type WorldInfo } from "../components/WorldPicker";
 import { useIsNarrow } from "../hooks/useIsNarrow";
 import { isAvailable } from "../lib/versions";
 import { PageState } from "../session/PageState";
+import { loadDisabledIds } from "../stores/pixelPaletteProps";
 import { Storer } from "../stores/storer";
-import PixelPalette, { type PixelPaletteProps } from "./PixelPalette";
+import PixelPalette from "./PixelPalette";
 import { AppSettings } from "./SettingsPage";
 
 interface PixelPaletteJson {
@@ -84,13 +85,7 @@ type GenerationPlane = "xOy" | "xOz" | "yOz";
 const PLANES: readonly GenerationPlane[] = ["xOy", "xOz", "yOz"];
 
 type ColorDistanceFormula =
-  | "RGB"
-  | "RGB+"
-  | "Redmean"
-  | "CMC l:c"
-  | "CIE76"
-  | "CIE94"
-  | "CIEDE2000";
+  "RGB" | "RGB+" | "Redmean" | "CMC l:c" | "CIE76" | "CIE94" | "CIEDE2000";
 
 const FORMULAS: readonly ColorDistanceFormula[] = [
   "RGB",
@@ -318,13 +313,14 @@ export default function PixelPage({
       }
     };
 
-    const paletteProps = await Storer.loadPref<PixelPaletteProps>(
-      "pixel_palette_props",
-    );
+    const disabledIds = await loadDisabledIds();
     const palette = data.useStaircase
       ? Object.entries((staircase_palette as StaircasePaletteJson).data)
           .filter(([key]) =>
-            isAvailable(SINCE_BY_ID.get(key.replace(/^minecraft:/, "")), targetVersion),
+            isAvailable(
+              SINCE_BY_ID.get(key.replace(/^minecraft:/, "")),
+              targetVersion,
+            ),
           )
           .map(([key, hex]) => ({
             // 保留 minecraft: 前缀，世界存档需要完整 id
@@ -340,7 +336,7 @@ export default function PixelPage({
               return false;
             }
 
-            if (paletteProps.disabledIds.includes(p.id)) {
+            if (disabledIds.includes(p.id)) {
               return false;
             }
 
