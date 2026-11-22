@@ -15,7 +15,8 @@
     "storagePermissionTitle": "需要存储访问权限",
     "storagePermissionBody": "Colorify 需要「所有文件访问」权限才能读取/写入 Minecraft 世界存档（.mcworld）。请在系统设置中开启：设置 -> 应用 -> Colorify -> 所有文件访问",
     "storagePermissionOpen": "去设置",
-    "storagePermissionLater": "稍后"
+    "storagePermissionLater": "稍后",
+    "openFolder": "打开文件夹"
   },
   "main": {
     "workArea2d": "2D 像素画生成",
@@ -121,6 +122,11 @@
       "argNoSandsAndPowders": "无沙子与粉末",
       "argNoSandsAndPowdersDesc": "是否避免使用沙子和粉末方块",
 
+      "waitingPicker": "正在等待文件返回…（首次生成需要一点时间）",
+
+      "argOrigin": "生成坐标",
+      "argOriginDesc": "留空时相对玩家或执行位置生成；填写后以该坐标为基准点",
+
       "argOffset": "偏移",
       "argOffsetDesc": "生成的像素画的偏移",
 
@@ -138,7 +144,6 @@
       "argLdbWorldPath": "世界路径",
       "argLdbWorldPathPlaceholder": "未选择世界",
       "argLdbBrowse": "浏览",
-      "argLdbOrigin": "生成坐标",
       "argLdbNoWorld": "未发现世界存档",
       "argLdbWorldDirHint": "请把 Minecraft 世界文件夹（含 db 目录）放到 Download/colorify 下",
       "argLdbOpenSettings": "去设置开启权限",

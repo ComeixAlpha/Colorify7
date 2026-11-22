@@ -21,6 +21,8 @@ pub struct GenParams {
     /// 阶梯式无损压缩：每级高度压到 min(gap, 2)，每段独立下沉使最低方块贴基准 0
     pub staircase_compress: bool,
     pub offset: [i32; 3],
+    /// 生成坐标基准点：None = 沿用相对坐标（`~` / 玩家位置）
+    pub origin: Option<[i32; 3]>,
     pub auto_slice_mcfunction: bool,
     pub use_dithering: bool,
     pub socket_output: bool,
@@ -318,11 +320,13 @@ fn command_coords(params: &GenParams, x: i32, y: i32, z: i32) -> (i32, i32, i32)
     )
 }
 
-/// WebSocket 命令
 #[inline(always)]
 fn socket_command(params: &GenParams, x: i32, y: i32, z: i32, id: &str) -> String {
     let (cx, cy, cz) = command_coords(params, x, y, z);
-    format!("setblock ~{} ~{} ~{} {}", cx, cy, cz, id)
+    match params.origin {
+        Some([ox, oy, oz]) => format!("setblock {} {} {} {}", cx + ox, cy + oy, cz + oz, id),
+        None => format!("setblock ~{} ~{} ~{} {}", cx, cy, cz, id),
+    }
 }
 
 #[inline(always)]
@@ -404,6 +408,7 @@ fn staircase_fs_dither(
 struct FunctionWriter {
     plane: i32,
     offset: [i32; 3],
+    origin: Option<[i32; 3]>,
     use_staircase: bool,
     auto_slice: bool,
     dir: std::path::PathBuf,
@@ -417,6 +422,7 @@ impl FunctionWriter {
         Ok(Self {
             plane: params.plane,
             offset: params.offset,
+            origin: params.origin,
             use_staircase: params.use_staircase,
             auto_slice: params.auto_slice_mcfunction,
             dir: out_dir.to_path_buf(),
@@ -433,14 +439,22 @@ impl FunctionWriter {
             let s = common::switch_xyz(self.plane, [x, y, z]);
             (s[0], s[1], s[2])
         };
-        write!(
-            self.writer,
-            "setblock ~{} ~{} ~{} {}\n",
+        let (cx, cy, cz) = (
             cx + self.offset[0],
             cy + self.offset[1],
             cz + self.offset[2],
-            id
-        )
+        );
+        match self.origin {
+            Some([ox, oy, oz]) => write!(
+                self.writer,
+                "setblock {} {} {} {}\n",
+                cx + ox,
+                cy + oy,
+                cz + oz,
+                id
+            ),
+            None => write!(self.writer, "setblock ~{} ~{} ~{} {}\n", cx, cy, cz, id),
+        }
         .map_err(|e| format!("写入 mcfunction 失败: {e}"))?;
         self.line_count += 1;
 

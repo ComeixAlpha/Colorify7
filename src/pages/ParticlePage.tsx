@@ -691,6 +691,7 @@ export default function ParticlePage({
         wsNoThanksLabel={t("pages.particle.wsNoThanks")}
         elapsedLabel={t("pages.particle.elapsedLabel")}
         outputLabel={t("pages.particle.outputLabel")}
+        openFolderLabel={t("app.openFolder")}
         cancelLabel="取消"
         onCancel={handleCancel}
         onDoneOk={handleDoneOk}

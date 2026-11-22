@@ -108,6 +108,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             app_ready,
             process::check_download_permission,
+            process::open_output_dir,
             pixel::process_image,
             pixel::cancel_process,
             particle::process_particle,

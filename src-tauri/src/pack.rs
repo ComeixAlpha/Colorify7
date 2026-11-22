@@ -283,6 +283,7 @@ pub fn script_ticking_area(
     scripts_dir: &Path,
     file_count: usize,
     size: [i32; 3],
+    origin: Option<[i32; 3]>,
 ) -> Result<(), String> {
     std::fs::create_dir_all(scripts_dir).map_err(|e| format!("创建脚本目录失败: {e}"))?;
 
@@ -304,6 +305,19 @@ pub fn script_ticking_area(
         String::new()
     };
 
+    let dx = size[0] - 1;
+    let dy = size[1] - 1;
+    let dz = size[2] - 1;
+    let ticking_area = match origin {
+        Some([ox, oy, oz]) => format!(
+            "tickingarea add {ox} {oy} {oz} {} {} {} colorify",
+            ox + dx,
+            oy + dy,
+            oz + dz
+        ),
+        None => format!("tickingarea add ~ ~ ~ ~{dx} ~{dy} ~{dz} colorify"),
+    };
+
     let script = format!(
         r#"import * as Server from "@minecraft/server";
 
@@ -311,7 +325,7 @@ Server.system.runInterval(() => {{
   const entities = Server.world.getDimension('overworld').getEntities();
   for (let entity of entities) {{
     if (entity.nameTag == 'block' && !entity.hasTag('blocked')) {{
-      entity.runCommand(`tickingarea add ~ ~ ~ ~{dx} ~{dy} ~{dz} colorify`);
+      entity.runCommand('{ticking_area}');
       entity.addTag('blocked');
       Server.system.runTimeout(() => {{
 {run_commands}
@@ -320,9 +334,6 @@ Server.system.runInterval(() => {{
   }}
 }});
 "#,
-        dx = size[0] - 1,
-        dy = size[1] - 1,
-        dz = size[2] - 1,
     );
 
     std::fs::write(scripts_dir.join("index.js"), script).map_err(|e| format!("写入脚本失败: {e}"))

@@ -170,6 +170,18 @@ impl ArtGenerator for PixelPipeline {
 
         // 匹配方块
         progress.stage("匹配方块");
+        let origin = if params.origin_x.is_none()
+            && params.origin_y.is_none()
+            && params.origin_z.is_none()
+        {
+            None
+        } else {
+            Some([
+                params.origin_x.unwrap_or(0),
+                params.origin_y.unwrap_or(0),
+                params.origin_z.unwrap_or(0),
+            ])
+        };
         let gen_params = generator::GenParams {
             plane,
             color_distance: params.color_distance_formula.clone(),
@@ -186,6 +198,7 @@ impl ArtGenerator for PixelPipeline {
                 params.offset_y.unwrap_or(0),
                 params.offset_z.unwrap_or(0),
             ],
+            origin,
             auto_slice_mcfunction: params.auto_slice_mcfunction,
             use_dithering: params.use_dithering,
             socket_output: params.use_socket,
@@ -206,11 +219,7 @@ impl ArtGenerator for PixelPipeline {
         if params.use_ldb {
             let blocks = output.blocks_ldb.ok_or("ldb 模式缺少方块")?;
             let world_path = params.world_path.as_deref().ok_or("未选择世界路径")?;
-            let origin = [
-                params.origin_x.unwrap_or(0),
-                params.origin_y.unwrap_or(0),
-                params.origin_z.unwrap_or(0),
-            ];
+            let origin = origin.unwrap_or([0, 0, 0]);
             crate::ldb::write_blocks_to_world(world_path, 0, origin, &blocks, progress)?;
             return Ok(None);
         }
@@ -239,7 +248,12 @@ impl ArtGenerator for PixelPipeline {
         if need_pack {
             let zp = out_dir.join("colorified");
             if !params.use_struct {
-                pack::script_ticking_area(&zp.join("scripts"), output.function_files, output.size)?;
+                pack::script_ticking_area(
+                    &zp.join("scripts"),
+                    output.function_files,
+                    output.size,
+                    origin,
+                )?;
             }
             if let Some(icon) = pack::identicon_png(pack::time_based_code()) {
                 std::fs::write(zp.join("pack_icon.png"), &icon)
@@ -259,7 +273,7 @@ pub fn process_image(
     app: tauri::AppHandle,
     state: tauri::State<'_, PixelProcessState>,
     ws_state: tauri::State<'_, Arc<ws::WsState>>,
-    image: Vec<u8>,
+    image_base64: String,
     params: PixelParams,
     palette: Vec<image_ditherer::PaletteColorInput>,
     on_progress: Channel<ProgressMessage>,
@@ -283,6 +297,10 @@ pub fn process_image(
         on_progress,
         "pixel",
         move |app, ws, progress| {
+            use base64::Engine;
+            let image = base64::engine::general_purpose::STANDARD
+                .decode(image_base64.as_bytes())
+                .map_err(|e| format!("图片数据解码失败: {e}"))?;
             let pipeline = PixelPipeline { params, palette };
             run_art_pipeline(
                 app,

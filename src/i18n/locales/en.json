@@ -15,7 +15,8 @@
     "storagePermissionTitle": "Storage access required",
     "storagePermissionBody": "Colorify needs \"All files access\" to read/write Minecraft world saves (.mcworld). Enable it in: Settings -> Apps -> Colorify -> All files access",
     "storagePermissionOpen": "Open settings",
-    "storagePermissionLater": "Later"
+    "storagePermissionLater": "Later",
+    "openFolder": "Open folder"
   },
   "main": {
     "workArea2d": "2D Pixel Art",
@@ -121,6 +122,11 @@
       "argNoSandsAndPowders": "No Sands and Powders",
       "argNoSandsAndPowdersDesc": "Whether to avoid using sand and powder blocks",
 
+      "waitingPicker": "Waiting for the file… (the first run may take a little longer)",
+
+      "argOrigin": "Origin coordinates",
+      "argOriginDesc": "Leave empty to generate relative to the player or execution position; when filled, this becomes the base point",
+
       "argOffset": "Offset",
       "argOffsetDesc": "The offset of the generated pixel art",
 
@@ -138,7 +144,6 @@
       "argLdbWorldPath": "World path",
       "argLdbWorldPathPlaceholder": "No world selected",
       "argLdbBrowse": "Browse",
-      "argLdbOrigin": "Origin coordinates",
       "argLdbNoWorld": "No world save found",
       "argLdbWorldDirHint": "Put your Minecraft world folder (with a db directory) under emulated/0/Download/colorify",
       "argLdbOpenSettings": "Open settings to grant access",

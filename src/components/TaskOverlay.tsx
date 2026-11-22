@@ -3,6 +3,8 @@ import {
   M3eCircularProgressIndicator,
   M3eIcon,
 } from "@m3e/react/all";
+import { invoke } from "@tauri-apps/api/core";
+import { useEffect, useState } from "react";
 
 export function formatElapsed(ms: number): string {
   const s = ms / 1000;
@@ -33,6 +35,8 @@ export interface TaskOverlayProps {
   outputLabel?: string;
   cancelLabel?: string;
   okLabel?: string;
+  /** 「打开文件夹」按钮文案；不传则不显示该按钮 */
+  openFolderLabel?: string;
   onCancel?: () => void;
   onDoneOk: () => void;
   onWsGoPage?: () => void;
@@ -52,10 +56,39 @@ export default function TaskOverlay({
   outputLabel,
   cancelLabel = "取消",
   okLabel = "OK",
+  openFolderLabel,
   onCancel,
   onDoneOk,
   onWsGoPage,
 }: TaskOverlayProps) {
+  const outputDir = resultInfo.outputDir;
+  const [openFolderError, setOpenFolderError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setOpenFolderError(null);
+  }, [outputDir]);
+
+  // 仅桌面端
+  const canOpenFolder =
+    !!openFolderLabel &&
+    !!outputDir &&
+    !wsMode &&
+    !error &&
+    typeof window !== "undefined" &&
+    !/Android/i.test(navigator.userAgent) &&
+    "__TAURI_INTERNALS__" in window;
+
+  async function handleOpenFolder() {
+    if (!outputDir) return;
+    try {
+      await invoke("open_output_dir", { path: outputDir });
+      setOpenFolderError(null);
+    } catch (err) {
+      console.error("open output folder failed:", err);
+      setOpenFolderError(typeof err === "string" ? err : String(err));
+    }
+  }
+
   if (!processing) return null;
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-md-scrim/60">
@@ -87,6 +120,11 @@ export default function TaskOverlay({
                       {outputLabel} {resultInfo.outputDir}
                     </span>
                   )}
+                  {openFolderError && (
+                    <span className="break-all text-sm text-md-error">
+                      {openFolderError}
+                    </span>
+                  )}
                 </>
               )}
             </div>
@@ -100,7 +138,14 @@ export default function TaskOverlay({
                 </M3eButton>
               </>
             ) : (
-              <M3eButton onClick={onDoneOk}>{okLabel}</M3eButton>
+              <>
+                {canOpenFolder && (
+                  <M3eButton variant="tonal" onClick={handleOpenFolder}>
+                    {openFolderLabel}
+                  </M3eButton>
+                )}
+                <M3eButton onClick={onDoneOk}>{okLabel}</M3eButton>
+              </>
             )}
           </>
         ) : (

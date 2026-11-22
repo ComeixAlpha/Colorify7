@@ -1778,6 +1778,7 @@ export default function ObjToVoxelPage({
         wsNoThanksLabel={t("pages.obj3d.wsNoThanks")}
         elapsedLabel={t("pages.obj3d.elapsedLabel")}
         outputLabel={t("pages.obj3d.outputLabel")}
+        openFolderLabel={t("app.openFolder")}
         cancelLabel={t("pages.obj3d.cancel")}
         onCancel={handleCancel}
         onDoneOk={handleDoneOk}

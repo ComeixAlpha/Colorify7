@@ -235,7 +235,15 @@ pub fn check_download_permission() -> bool {
     }
 }
 
-/// 生成时间戳
+#[tauri::command]
+pub fn open_output_dir(path: String) -> Result<(), String> {
+    let dir = std::path::Path::new(&path);
+    if !dir.is_dir() {
+        return Err(format!("目录不存在: {path}"));
+    }
+    tauri_plugin_opener::open_path(dir, None::<&str>).map_err(|e| format!("打开文件夹失败: {e}"))
+}
+
 fn timestamp_folder() -> String {
     let secs = SystemTime::now()
         .duration_since(UNIX_EPOCH)

@@ -59,6 +59,40 @@ function hexToRgb(hex: string): [number, number, number] {
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
 
+/**
+ * 把图片读成 base64
+ */
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result;
+      if (typeof result !== "string") {
+        reject(new Error("读取图片失败"));
+        return;
+      }
+      const comma = result.indexOf(",");
+      resolve(comma >= 0 ? result.slice(comma + 1) : result);
+    };
+    reader.onerror = () => reject(reader.error ?? new Error("读取图片失败"));
+    reader.readAsDataURL(file);
+  });
+}
+
+function nextPaint(): Promise<void> {
+  return new Promise((resolve) => {
+    let settled = false;
+    const done = () => {
+      if (!settled) {
+        settled = true;
+        resolve();
+      }
+    };
+    requestAnimationFrame(() => requestAnimationFrame(done));
+    setTimeout(done, 40);
+  });
+}
+
 type ResizeInterpolation =
   | "Nearest"
   | "Box"
@@ -211,6 +245,10 @@ export default function PixelPage({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cancelledRef = useRef(false);
   const modeRef = useRef<"file" | "socket" | "ldb">("file");
+  const pickingRef = useRef(false);
+  const waitingShowRef = useRef<number | null>(null);
+  const waitingHideRef = useRef<number | null>(null);
+
   const [processing, setProcessing] = useState(false);
   const [done, setDone] = useState(false);
   const [doneError, setDoneError] = useState(false);
@@ -236,22 +274,78 @@ export default function PixelPage({
     return () => clearInterval(id);
   }, []);
 
+  function clearWaitingTimers() {
+    if (waitingShowRef.current != null) {
+      window.clearTimeout(waitingShowRef.current);
+      waitingShowRef.current = null;
+    }
+    if (waitingHideRef.current != null) {
+      window.clearTimeout(waitingHideRef.current);
+      waitingHideRef.current = null;
+    }
+  }
+
   function handleFilesClick() {
-    modeRef.current = "file";
-    fileInputRef.current?.click();
+    beginPick("file");
   }
 
   function handleWsClick() {
-    modeRef.current = "socket";
-    fileInputRef.current?.click();
+    beginPick("socket");
   }
 
   function handleLdbClick() {
-    modeRef.current = "ldb";
+    beginPick("ldb");
+  }
+
+  function beginPick(mode: "file" | "socket" | "ldb") {
+    modeRef.current = mode;
+    pickingRef.current = true;
+    clearWaitingTimers();
     fileInputRef.current?.click();
   }
 
-  /// 浏览世界文件夹（直写 LevelDB 用）：桌面用系统目录选择器，安卓用世界发现列表
+  useEffect(() => {
+    const onFocus = () => {
+      if (!pickingRef.current || isAndroid) return;
+      clearWaitingTimers();
+      waitingShowRef.current = window.setTimeout(() => {
+        waitingShowRef.current = null;
+        if (!pickingRef.current) return;
+        setProcessing(true);
+        setDone(false);
+        setDoneError(false);
+        setWsMode(modeRef.current === "socket");
+        setProgressText(t("pages.pixel.waitingPicker"));
+        waitingHideRef.current = window.setTimeout(() => {
+          // 兜底：既没 change 也没 cancel（老 WebView2 不支持 cancel 事件）
+          waitingHideRef.current = null;
+          if (pickingRef.current) {
+            pickingRef.current = false;
+            setProcessing(false);
+          }
+        }, 20000);
+      }, 200);
+    };
+    window.addEventListener("focus", onFocus);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      clearWaitingTimers();
+    };
+  }, []);
+
+  useEffect(() => {
+    const el = fileInputRef.current;
+    if (!el) return;
+    const onCancel = () => {
+      pickingRef.current = false;
+      clearWaitingTimers();
+      setProcessing(false);
+      setDone(false);
+    };
+    el.addEventListener("cancel", onCancel);
+    return () => el.removeEventListener("cancel", onCancel);
+  }, []);
+
   async function handleBrowseWorld() {
     if (isAndroid) {
       setPickerLoading(true);
@@ -285,18 +379,41 @@ export default function PixelPage({
 
   async function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null;
-    if (!file) {
-      e.target.value = "";
+    e.target.value = "";
+    pickingRef.current = false;
+    clearWaitingTimers();
+    if (!file) return;
+    if (cancelledRef.current) {
+      cancelledRef.current = false;
       return;
     }
-    const bytes = new Uint8Array(await file.arrayBuffer());
+    await startGeneration(file);
+  }
+
+  async function startGeneration(file: File) {
+    cancelledRef.current = false;
+
+    setProcessing(true);
+    setDone(false);
+    setDoneError(false);
+    setWsMode(modeRef.current === "socket");
+    setProgressText("正在准备...");
+    await nextPaint();
+    if (cancelledRef.current) return;
+    let imageBase64: string;
+    try {
+      imageBase64 = await fileToBase64(file);
+    } catch (err) {
+      console.error("read image failed:", err);
+      setDone(true);
+      setDoneError(true);
+      setProgressText(typeof err === "string" ? err : String(err));
+      return;
+    }
 
     // 订阅后端进度消息
     const channel = new Channel<ProgressMessage>();
-    console.log("Channel id:", channel.id);
-    cancelledRef.current = false;
     channel.onmessage = (msg) => {
-      console.log("Received progress message:", msg);
       if (msg.finished) {
         if (msg.error) {
           setDone(true);
@@ -367,22 +484,17 @@ export default function PixelPage({
             sideSrgb: p.sideSrgb,
           }));
 
-    setProcessing(true);
-    setDone(false);
-    setDoneError(false);
-    setWsMode(modeRef.current === "socket");
-    setProgressText("正在准备...");
     try {
       await invoke("process_image", {
-        image: bytes,
+        imageBase64,
         params: {
           ...data,
           useSocket: modeRef.current === "socket",
           useLdb: modeRef.current === "ldb",
           worldPath: modeRef.current === "ldb" ? data.worldPath : null,
-          originX: modeRef.current === "ldb" ? data.originX : null,
-          originY: modeRef.current === "ldb" ? data.originY : null,
-          originZ: modeRef.current === "ldb" ? data.originZ : null,
+          originX: data.originX,
+          originY: data.originY,
+          originZ: data.originZ,
           autoSliceMcfunction:
             Storer.load<AppSettings>("settings").autoSliceMcfunction,
           previewImage: Storer.load<AppSettings>("settings").previewImage,
@@ -398,12 +510,12 @@ export default function PixelPage({
       setDoneError(true);
       setProgressText(typeof err === "string" ? err : String(err));
     }
-    console.log("Sent image to backend:", file.name);
-    e.target.value = "";
   }
 
   async function handleCancel() {
     cancelledRef.current = true;
+    pickingRef.current = false;
+    clearWaitingTimers();
     setProcessing(false);
     setDone(false);
     try {
@@ -897,6 +1009,60 @@ export default function PixelPage({
             </div>
           </div>
 
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-col items-start gap-3 min-w-0">
+              <div className="flex flex-col min-w-0">
+                <span className="font-medium">
+                  {t("pages.pixel.argOrigin")}
+                </span>
+                <span className="text-sm text-md-on-surface-variant">
+                  {t("pages.pixel.argOriginDesc")}
+                </span>
+              </div>
+
+              <div className="flex gap-4 pt-2">
+                <M3eFormField className="w-20 shrink-0" hideSubscript="always">
+                  <label slot="label" htmlFor="origin-x">
+                    X
+                  </label>
+                  <input
+                    id="origin-x"
+                    type="number"
+                    value={data.originX ?? ""}
+                    onChange={handleNumberChange("originX")}
+                    className="w-full bg-transparent outline-none text-left"
+                  />
+                </M3eFormField>
+
+                <M3eFormField className="w-20 shrink-0" hideSubscript="always">
+                  <label slot="label" htmlFor="origin-y">
+                    Y
+                  </label>
+                  <input
+                    id="origin-y"
+                    type="number"
+                    value={data.originY ?? ""}
+                    onChange={handleNumberChange("originY")}
+                    className="w-full bg-transparent outline-none text-left"
+                  />
+                </M3eFormField>
+
+                <M3eFormField className="w-20 shrink-0" hideSubscript="always">
+                  <label slot="label" htmlFor="origin-z">
+                    Z
+                  </label>
+                  <input
+                    id="origin-z"
+                    type="number"
+                    value={data.originZ ?? ""}
+                    onChange={handleNumberChange("originZ")}
+                    className="w-full bg-transparent outline-none text-left"
+                  />
+                </M3eFormField>
+              </div>
+            </div>
+          </div>
+
           {/* 偏移 */}
           <div className="flex items-center justify-between gap-4">
             <div className="flex-col items-start gap-3 min-w-0">
@@ -1050,59 +1216,6 @@ export default function PixelPage({
                   {t("pages.pixel.argLdbBrowse")}
                 </M3eButton>
               </div>
-              {/* 生成坐标 */}
-              <div className="flex flex-col gap-2">
-                <span className="font-medium">
-                  {t("pages.pixel.argLdbOrigin")}
-                </span>
-                <div className="flex w-full min-w-0 gap-2">
-                  <M3eFormField
-                    className="flex-1 shrink-0"
-                    hideSubscript="always"
-                  >
-                    <label slot="label" htmlFor="ldb-origin-x">
-                      X
-                    </label>
-                    <input
-                      id="ldb-origin-x"
-                      type="number"
-                      value={data.originX ?? ""}
-                      onChange={handleNumberChange("originX")}
-                      className="w-full bg-transparent outline-none text-left"
-                    />
-                  </M3eFormField>
-                  <M3eFormField
-                    className="flex-1 shrink-0"
-                    hideSubscript="always"
-                  >
-                    <label slot="label" htmlFor="ldb-origin-y">
-                      Y
-                    </label>
-                    <input
-                      id="ldb-origin-y"
-                      type="number"
-                      value={data.originY ?? ""}
-                      onChange={handleNumberChange("originY")}
-                      className="w-full bg-transparent outline-none text-left"
-                    />
-                  </M3eFormField>
-                  <M3eFormField
-                    className="flex-1 shrink-0"
-                    hideSubscript="always"
-                  >
-                    <label slot="label" htmlFor="ldb-origin-z">
-                      Z
-                    </label>
-                    <input
-                      id="ldb-origin-z"
-                      type="number"
-                      value={data.originZ ?? ""}
-                      onChange={handleNumberChange("originZ")}
-                      className="w-full bg-transparent outline-none text-left"
-                    />
-                  </M3eFormField>
-                </div>
-              </div>
             </div>
           )}
 
@@ -1242,6 +1355,7 @@ export default function PixelPage({
         wsNoThanksLabel={t("pages.pixel.wsNoThanks")}
         elapsedLabel={t("pages.pixel.elapsedLabel")}
         outputLabel={t("pages.pixel.outputLabel")}
+        openFolderLabel={t("app.openFolder")}
         cancelLabel="取消"
         onCancel={handleCancel}
         onDoneOk={handleDoneOk}
